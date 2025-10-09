@@ -72,7 +72,7 @@ env:
   BASEBAND_GUARD_BOOT: "false" #if u want to protect boot partition.
 
   HOOK_METHOD: "syscall" # manual hook method,can choice : normal, syscall and tracepoint.
-  HOOK_OLDER: "true" # contain backport older patch and syscall older patch.
+  HOOK_OLDER: "false" # contain backport older patch and syscall older patch.
 
   KPM_ENABLE: "true" # Only use it for SukiSU-Ultra.
   KPM_FIX: "true" # Fix Error When Enabling KPM.
@@ -93,7 +93,7 @@ jobs:
   build-kernel:
     name: Redmi 8 (Based-AOSP A15)
     runs-on: ubuntu-latest # u can changed to ubuntu 22.04, and need container set ubuntu-latest
-    # container: ubuntu:focal # if u need use arch linux -> archlinux/archlinux:latest or ubuntu 20.04 -> ubuntu:focal
+    container: ubuntu:focal # if u need use arch linux -> archlinux/archlinux:latest or ubuntu 20.04 -> ubuntu:focal
     env:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
       CCACHE_NOHASHDIR: "true"
