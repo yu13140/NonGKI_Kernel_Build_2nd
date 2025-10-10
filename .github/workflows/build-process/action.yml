@@ -265,7 +265,7 @@ runs:
                       gzip -c Image > Image.gz
                       cat Image.gz dts/${{ env.GENERATE_CHIP }}/*.dtb > Image.gz-dtb
                       echo "Hook Image successfully !"
-                  elif [ -f "out/arch/arm64/boot/vendor/dts/${{ env.GENERATE_CHIP }}/*.dtb" ]; then
+                  elif [ -f "out/arch/arm64/boot/dts/vendor/${{ env.GENERATE_CHIP }}/*.dtb" ]; then
                       rm -f "$IMAGE_DIR/Image.gz-dtb" "$IMAGE_DIR/Image.gz"
                       cp patch "$IMAGE_DIR/"
                       cd "$IMAGE_DIR/" || exit 1
@@ -273,7 +273,7 @@ runs:
                       rm -f Image
                       mv oImage Image
                       gzip -c Image > Image.gz
-                      cat Image.gz vendor/dts/${{ env.GENERATE_CHIP }}/*.dtb > Image.gz-dtb
+                      cat Image.gz dts/vendor/${{ env.GENERATE_CHIP }}/*.dtb > Image.gz-dtb
                       echo "Hook Image successfully !"
                   else
                       echo "Not found dts folder, abort."

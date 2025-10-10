@@ -54,8 +54,8 @@ runs:
             echo "Found DTB!"
             cp -fp $IMAGE_DIR/dtb tmp
           elif [ "${{ env.GENERATE_DTB }}" == "true" ]; then
-            if [ -f "$IMAGE_DIR/vendor/dts/${{ env.GENERATE_CHIP }}/*.dtb" ]; then
-                cat $IMAGE_DIR/vendor/dts/${{ env.GENERATE_CHIP }}/*.dtb > $IMAGE_DIR/DTB
+            if [ -f "$IMAGE_DIR/dts/vendor/${{ env.GENERATE_CHIP }}/*.dtb" ]; then
+                cat $IMAGE_DIR/dts/vendor/${{ env.GENERATE_CHIP }}/*.dtb > $IMAGE_DIR/DTB
                 cp -fp $IMAGE_DIR/DTB tmp
                 echo "Generated ${{ env.GENERATE_CHIP }} DTB."
             elif [ -f "$IMAGE_DIR/dts/${{ env.GENERATE_CHIP }}/*.dtb" ]; then
@@ -108,8 +108,8 @@ runs:
             echo "Found DTB!"
             cp -fp $IMAGE_DIR/dtb out/dtb
           elif [ "${{ env.GENERATE_DTB }}" == "true" ]; then
-            if [ -f "$IMAGE_DIR/vendor/dts/${{ env.GENERATE_CHIP }}/*.dtb" ]; then
-                cat $IMAGE_DIR/vendor/dts/${{ env.GENERATE_CHIP }}/*.dtb > $IMAGE_DIR/DTB
+            if [ -f "$IMAGE_DIR/dts/vendor/${{ env.GENERATE_CHIP }}/*.dtb" ]; then
+                cat $IMAGE_DIR/dts/vendor/${{ env.GENERATE_CHIP }}/*.dtb > $IMAGE_DIR/DTB
                 cp -fp $IMAGE_DIR/DTB tmp
                 echo "Generated ${{ env.GENERATE_CHIP }} DTB."
             elif [ -f "$IMAGE_DIR/dts/${{ env.GENERATE_CHIP }}/*.dtb" ]; then
