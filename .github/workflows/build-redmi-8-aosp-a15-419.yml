@@ -3,7 +3,6 @@ name: Build Redmi 8 (Based-AOSP A15)
 on:
   workflow_call:
   workflow_dispatch:
-  push:
 
 env:
   # Device env
@@ -126,13 +125,6 @@ jobs:
 
       - name: 🔒 Patch Kernel of Baseband Guard
         uses: ./.github/workflows/patch-baseband-guard
-      
-      - name: Upload Build Artifacts For Packing Error
-        uses: actions/upload-artifact@v4
-        with:
-          name: binder_alloc
-          path: |
-            device_kernel/drivers/android/binder_alloc.c
 
       - name: 🚀 Build Process
         uses: ./.github/workflows/build-process

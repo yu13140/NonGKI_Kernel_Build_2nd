@@ -126,20 +126,6 @@ jobs:
 
       - name: 🔒 Patch Kernel of Baseband Guard
         uses: ./.github/workflows/patch-baseband-guard
-        
-      - name: Upload Build Artifacts For Packing Error
-        uses: actions/upload-artifact@v4
-        with:
-          name: fs
-          path: |
-            device_kernel/fs
-
-      - name: Upload Build Artifacts For Packing Error 2
-        uses: actions/upload-artifact@v4
-        with:
-          name: sched
-          path: |
-            device_kernel/include/linux/sched.h
 
       - name: 🚀 Build Process
         uses: ./.github/workflows/build-process
