@@ -10,7 +10,7 @@ env:
   DEVICE_CODENAME : "olive"
 
   CUSTOM_CMDS : "CLANG_TRIPLE=aarch64-linux-gnu-"
-  EXTRA_CMDS : "LLVM=1"
+  EXTRA_CMDS : "LD=ld.lld LLVM=1 LLVM_IAS=1"
 
   KERNEL_SOURCE : "https://github.com/JackA1ltman/android_kernel_xiaomi_sdm439-4.19.git"
   KERNEL_BRANCH : "ksu-next"
@@ -19,10 +19,10 @@ env:
   CLANG_BRANCH : "master"
 
   GCC_GNU : false
-  GCC_64_SOURCE : "https://github.com/JackA1ltman/Google-GCC-Android-4.9.git"
-  GCC_64_BRANCH : "aarch64"
-  GCC_32_SOURCE : "https://github.com/JackA1ltman/Google-GCC-Android-4.9.git"
-  GCC_32_BRANCH : "arm32"
+  GCC_64_SOURCE : ""
+  GCC_64_BRANCH : ""
+  GCC_32_SOURCE : ""
+  GCC_32_BRANCH : ""
 
   DEFCONFIG_SOURCE: ""
   DEFCONFIG_NAME : "vendor/msm8937-perf_defconfig"
@@ -45,8 +45,8 @@ env:
 
   BOOT_SOURCE : ""
 
-  NEED_DTBO : true
-  NEED_SAFE_DTBO : true
+  NEED_DTBO : false
+  NEED_SAFE_DTBO : false
 
   ROM_TEXT : "4.19_based_aosp_a15"
 
@@ -64,7 +64,7 @@ env:
   SUSFS_155_FIXED: "susfs_155_fixed" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2 (Only v1.5.5 SuSFS)
   SUSFS_LATEST_FIXED: "" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2
 
-  REKERNEL_ENABLE: "false" # if u need Re:Kernel.
+  REKERNEL_ENABLE: "true" # if u need Re:Kernel.
   REKERNEL_FIXED: "rekernel_fixed" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2 (From SUSFS_FOLDER_FIXED)
   
   BASEBAND_GUARD_ENABLE: "false" #if u want prevent unauthorized writes to critical partitions/device nodes.
@@ -125,6 +125,13 @@ jobs:
 
       - name: 🔒 Patch Kernel of Baseband Guard
         uses: ./.github/workflows/patch-baseband-guard
+      
+      - name: Upload Build Artifacts For Packing Error
+        uses: actions/upload-artifact@v4
+        with:
+          name: binder_alloc
+          path: |
+            device_kernel/drivers/android/binder_alloc.c
 
       - name: 🚀 Build Process
         uses: ./.github/workflows/build-process
