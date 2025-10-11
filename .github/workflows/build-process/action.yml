@@ -235,7 +235,7 @@ runs:
           fi
 
       - name: KPM Patcher (Experiment)
-        if: env.KPM_ENABLE == 'true'
+        if: env.KPM_ENABLE == 'true' && env.KPM_PATCH == 'true'
         shell: bash
         run: |
           cd $GITHUB_WORKSPACE/device_kernel/
