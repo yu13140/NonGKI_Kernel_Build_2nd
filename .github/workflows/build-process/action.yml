@@ -255,7 +255,9 @@ runs:
           case "$MODE" in
             gz-dtb)
               if [ -f "include/linux/set_memory.h" ]; then
-                  if [[ -f "out/arch/arm64/boot/dts/${{ env.GENERATE_CHIP }}/*.dtb" ]]; then
+                  cp /tmp/Bin/found_dtb.sh ./
+                  bash found_dtb.sh
+                  if [ "${{ env.DTB_PATH }}" -eq 0 ]; then
                       rm -f "$IMAGE_DIR/Image.gz-dtb" "$IMAGE_DIR/Image.gz"
                       cp patch "$IMAGE_DIR/"
                       cd "$IMAGE_DIR/" || exit 1
@@ -265,7 +267,7 @@ runs:
                       gzip -c Image > Image.gz
                       cat Image.gz dts/${{ env.GENERATE_CHIP }}/*.dtb > Image.gz-dtb
                       echo "Hook Image successfully !"
-                  elif [[ -f "out/arch/arm64/boot/dts/vendor/${{ env.GENERATE_CHIP }}/*.dtb" ]]; then
+                  if [ "${{ env.DTB_PATH }}" -eq 1 ]; then
                       rm -f "$IMAGE_DIR/Image.gz-dtb" "$IMAGE_DIR/Image.gz"
                       cp patch "$IMAGE_DIR/"
                       cd "$IMAGE_DIR/" || exit 1
