@@ -3,7 +3,6 @@ name: Build Redmi 8 (Based-AOSP A15)
 on:
   workflow_call:
   workflow_dispatch:
-  push:
 
 env:
   # Device env
