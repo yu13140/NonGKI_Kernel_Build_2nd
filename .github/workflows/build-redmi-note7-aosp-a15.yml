@@ -35,7 +35,7 @@ env:
   KERNELSU_NAME : ""
 
   KERNELSU_AUTO_GET : "true" # if u want easy setting kernelsu, u can true.
-  KERNELSU_AUTO_FORK : "next" # magic, rsuntk and sukisu
+  KERNELSU_AUTO_FORK : "wild" # magic, rsuntk and sukisu
 
   SUSFS_ENABLE : true
   SUSFS_FIXED : true
