@@ -120,6 +120,8 @@ jobs:
         run: |
           # Only ${{ env.DEVICE_NAME }} use it.
           cd $GITHUB_WORKSPACE/device_kernel
+          echo "CONFIG_KSU=y" >> ./arch/arm64/configs/vendor/lavender-perf_defconfig
+          echo "# CONFIG_KPROBES is not set" >> ./arch/arm64/configs/vendor/lavender-perf_defconfig
           echo "CONFIG_KSU_SUSFS=y" >> ./arch/arm64/configs/vendor/lavender-perf_defconfig
           echo "CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y" >> ./arch/arm64/configs/vendor/lavender-perf_defconfig
           echo "CONFIG_KSU_SUSFS_SUS_PATH=y" >> ./arch/arm64/configs/vendor/lavender-perf_defconfig
@@ -133,7 +135,7 @@ jobs:
           echo "CONFIG_KSU_SUSFS_SPOOF_UNAME=y" >> ./arch/arm64/configs/vendor/lavender-perf_defconfig
           echo "CONFIG_KSU_SUSFS_ENABLE_LOG=y" >> ./arch/arm64/configs/vendor/lavender-perf_defconfig
           echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> ./arch/arm64/configs/vendor/lavender-perf_defconfig
-echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> ./arch/arm64/configs/vendor/lavender-perf_defconfig
+          echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> ./arch/arm64/configs/vendor/lavender-perf_defconfig
           echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> ./arch/arm64/configs/vendor/lavender-perf_defconfig
 
       - name: 🧰 Patch Kernel of Re:Kernel
@@ -141,13 +143,6 @@ echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> ./arch/arm64/configs/ve
 
       - name: 🔒 Patch Kernel of Baseband Guard
         uses: ./.github/workflows/patch-baseband-guard
-
-      - name: Upload Build Artifacts For Packing Error
-        uses: actions/upload-artifact@v4
-        with:
-          name: fs
-          path: |
-            device_kernel/fs
 
       - name: 🚀 Build Process
         uses: ./.github/workflows/build-process
