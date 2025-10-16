@@ -14,7 +14,7 @@ env:
   EXTRA_CMDS : "LD=ld.lld LLVM=1 LLVM_IAS=1"
 
   KERNEL_SOURCE : "https://github.com/yu13140/android_kernel_xiaomi_sdm660_419.git"
-  KERNEL_BRANCH : "ksun"
+  KERNEL_BRANCH : "12"
 
   CLANG_SOURCE : "https://github.com/ZyCromerZ/Clang/releases/download/22.0.0git-20250928-release/Clang-22.0.0git-20250928.tar.gz"
   CLANG_BRANCH : ""
