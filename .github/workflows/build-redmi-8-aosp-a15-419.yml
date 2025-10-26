@@ -3,6 +3,7 @@ name: Build Redmi 8 (Based-AOSP A15)
 on:
   workflow_call:
   workflow_dispatch:
+  push:
 
 env:
   # Device env
@@ -81,7 +82,7 @@ env:
   GENERATE_DTB: "false" # if u kernel need DTB , but cannot auto generate it. (Only Anykernel3).
   GENERATE_CHIP: "xiaomi-sdm439" # only supported for qcom and mediatek.
 
-  BUILD_DEBUGGER: "false" # Output build errors.
+  BUILD_DEBUGGER: "true" # Output build errors.
   SKIP_PATCH: "true" # Ignore errors found in Patch Debugger.
 
   BUILD_OTHER_CONFIG: "true" # Merge config files.
