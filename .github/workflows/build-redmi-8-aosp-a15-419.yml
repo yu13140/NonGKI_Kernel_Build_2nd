@@ -145,7 +145,7 @@ jobs:
       - name: Upload Build Artifacts For Packing Error 3
         uses: actions/upload-artifact@v4
         with:
-          name: susfs_def
+          name: susfs
           path: |
             device_kernel/include/linux/susfs.h
 
