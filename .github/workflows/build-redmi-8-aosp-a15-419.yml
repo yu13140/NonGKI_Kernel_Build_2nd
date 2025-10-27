@@ -63,7 +63,7 @@ env:
 
   SUSFS_FOLDER_FIXED: "redmi_8_419" # Fill in your patch prefix directory here. Leave it blank if there isn't one. -> your_folder
   SUSFS_155_FIXED: "susfs_155_fixed" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2 (Only v1.5.5 SuSFS)
-  SUSFS_LATEST_FIXED: "task_mmu_fixed" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2
+  SUSFS_LATEST_FIXED: "" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2
 
   REKERNEL_ENABLE: "true" # if u need Re:Kernel.
   REKERNEL_FIXED: "" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2 (From SUSFS_FOLDER_FIXED)
@@ -141,6 +141,13 @@ jobs:
           name: susfs_def
           path: |
             device_kernel/include/linux/susfs_def.h
+
+      - name: Upload Build Artifacts For Packing Error 3
+        uses: actions/upload-artifact@v4
+        with:
+          name: susfs_def
+          path: |
+            device_kernel/include/linux/susfs.h
 
       - name: 🚀 Build Process
         uses: ./.github/workflows/build-process
