@@ -63,12 +63,12 @@ env:
 
   SUSFS_FOLDER_FIXED: "redmi_8_419" # Fill in your patch prefix directory here. Leave it blank if there isn't one. -> your_folder
   SUSFS_155_FIXED: "susfs_155_fixed" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2 (Only v1.5.5 SuSFS)
-  SUSFS_LATEST_FIXED: "namespace.fixed" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2
+  SUSFS_LATEST_FIXED: "namespace_fixed" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2
 
   REKERNEL_ENABLE: "true" # if u need Re:Kernel.
   REKERNEL_FIXED: "" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2 (From SUSFS_FOLDER_FIXED)
   
-  BASEBAND_GUARD_ENABLE: "false" #if u want prevent unauthorized writes to critical partitions/device nodes.
+  BASEBAND_GUARD_ENABLE: "true" #if u want prevent unauthorized writes to critical partitions/device nodes.
   BASEBAND_GUARD_BOOT: "false" #if u want to protect boot partition.
 
   HOOK_METHOD: "syscall" # manual hook method,can choice : normal, syscall and tracepoint.
@@ -120,6 +120,7 @@ jobs:
         run: |
           # Only ${{ env.DEVICE_NAME }} use it.
           cd $GITHUB_WORKSPACE/device_kernel
+          sed -i '/^CONFIG_LOCALVERSION=/ s/="\([^"]*\)"/=yu13140/' ./common/arch/arm64/configs/vendor/xiaomi-sdm439.config
           # Nothing
 
       - name: 🧰 Patch Kernel of Re:Kernel
