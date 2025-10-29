@@ -120,7 +120,7 @@ jobs:
         run: |
           # Only ${{ env.DEVICE_NAME }} use it.
           cd $GITHUB_WORKSPACE/device_kernel
-          sed -i '/^CONFIG_LOCALVERSION=/ s/="\([^"]*\)"/=yu13140/' ./common/arch/arm64/configs/vendor/xiaomi-sdm439.config
+          sed -i '/^CONFIG_LOCALVERSION=/ s/="\([^"]*\)"/=yu13140/' arch/arm64/configs/vendor/xiaomi-sdm439.config
           # Nothing
 
       - name: 🧰 Patch Kernel of Re:Kernel
