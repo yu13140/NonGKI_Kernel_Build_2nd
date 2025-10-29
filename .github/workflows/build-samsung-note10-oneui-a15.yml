@@ -1,4 +1,4 @@
-name: Build Samsung Note 10 Plus (OneUI A15)
+name: Build Samsung Note 10 (OneUI A15)
 
 on:
   workflow_call:
@@ -6,8 +6,8 @@ on:
 
 env:
   # Device env
-  DEVICE_NAME : "samsung_note_10plus"
-  DEVICE_CODENAME : "d2s"
+  DEVICE_NAME : "samsung_note_10"
+  DEVICE_CODENAME : "d1"
 
   CUSTOM_CMDS : "CLANG_TRIPLE=aarch64-linux-gnu-"
   EXTRA_CMDS : "LLVM=1 LLVM_IAS=1"
@@ -81,13 +81,13 @@ env:
   SKIP_PATCH: "false" # Ignore errors found in Patch Debugger.
 
   BUILD_OTHER_CONFIG: "true" # Merge config files.
-  MERGE_CONFIG_FILES: "d2s.config"
+  MERGE_CONFIG_FILES: "d1.config"
 
   FREE_MORE_SPACE: "false" # if u want get more space, enabled it.
 
 jobs:
   build-kernel:
-    name: Samsung Note 10 Plus (OneUI A15)
+    name: Samsung Note 10 (OneUI A15)
     runs-on: ubuntu-latest # u can changed to ubuntu 22.04, and need container set ubuntu-latest
     # container: archlinux/archlinux:latest # if u need use arch linux -> archlinux/archlinux:latest or ubuntu 20.04 -> ubuntu:focal
     env:
@@ -133,7 +133,7 @@ jobs:
 
           # Var
           TIME=$(date +"%Y%m%d%H%M%S")
-          KERNEL_PATH=build/out/d2s/Image
+          KERNEL_PATH=build/out/d1/Image
           KERNEL_OFFSET=0x00008000
           RAMDISK_OFFSET=0xF0000000
           SECOND_OFFSET=0xF0000000
@@ -145,32 +145,32 @@ jobs:
           OS_PATCH_LEVEL=2025-01
           OS_VERSION=14.0.0
           PAGESIZE=2048
-          RAMDISK=build/out/d2s/ramdisk.cpio.gz
-          OUTPUT_FILE=build/out/d2s/boot.img
-          BOARD=SRPSC14B009KU
+          RAMDISK=build/out/d1/ramdisk.cpio.gz
+          OUTPUT_FILE=build/out/d1/boot.img
+          BOARD=SRPSD26B009KU
 
-          mkdir -p build/out/d2s/zip/files
-          mkdir -p build/out/d2s/zip/META-INF/com/google/android
+          mkdir -p build/out/d1/zip/files
+          mkdir -p build/out/d1/zip/META-INF/com/google/android
 
-          cp -f out/arch/arm64/boot/Image build/out/d2s/Image
+          cp -f out/arch/arm64/boot/Image build/out/d1/Image
 
-          ./toolchain/mkdtimg cfg_create build/out/d2s/dtb.img build/dtconfigs/exynos9825.cfg -d out/arch/arm64/boot/dts/exynos
-          ./toolchain/mkdtimg cfg_create build/out/d2s/dtbo.img build/dtconfigs/d2s.cfg -d out/arch/arm64/boot/dts/samsung
+          ./toolchain/mkdtimg cfg_create build/out/d1/dtb.img build/dtconfigs/exynos9825.cfg -d out/arch/arm64/boot/dts/exynos
+          ./toolchain/mkdtimg cfg_create build/out/d1/dtbo.img build/dtconfigs/d1.cfg -d out/arch/arm64/boot/dts/samsung
 
           pushd build/ramdisk > /dev/null
-          find . ! -name . | LC_ALL=C sort | cpio -o -H newc -R root:root | gzip > ../out/d2s/ramdisk.cpio.gz || abort
+          find . ! -name . | LC_ALL=C sort | cpio -o -H newc -R root:root | gzip > ../out/d1/ramdisk.cpio.gz || abort
           popd > /dev/null
 
           ./toolchain/mkbootimg --base $BASE --board $BOARD --cmdline "$CMDLINE" --hashtype $HASHTYPE --header_version $HEADER_VERSION --kernel $KERNEL_PATH --kernel_offset $KERNEL_OFFSET --os_patch_level $OS_PATCH_LEVEL --os_version $OS_VERSION --pagesize $PAGESIZE --ramdisk $RAMDISK --ramdisk_offset $RAMDISK_OFFSET --second_offset $SECOND_OFFSET --tags_offset $TAGS_OFFSET -o $OUTPUT_FILE
 
-          cp build/out/d2s/boot.img build/out/d2s/zip/files/boot.img
-          cp build/out/d2s/dtb.img build/out/d2s/zip/files/dtb.img
-          cp build/out/d2s/dtbo.img build/out/d2s/zip/files/dtbo.img
-          cp build/update-binary build/out/d2s/zip/META-INF/com/google/android/update-binary
-          cp build/updater-script build/out/d2s/zip/META-INF/com/google/android/updater-script
+          cp build/out/d1/boot.img build/out/d1/zip/files/boot.img
+          cp build/out/d1/dtb.img build/out/d1/zip/files/dtb.img
+          cp build/out/d1/dtbo.img build/out/d1/zip/files/dtbo.img
+          cp build/update-binary build/out/d1/zip/META-INF/com/google/android/update-binary
+          cp build/updater-script build/out/d1/zip/META-INF/com/google/android/updater-script
 
           mkdir tmp
-          cp -rp ./build/out/d2s/zip/* tmp
+          cp -rp ./build/out/d1/zip/* tmp
           cd tmp
           7za a -mx9 tmp.zip *
           cd ..

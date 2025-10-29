@@ -1,16 +1,18 @@
 diff --git a/fs/namespace.c b/fs/namespace.c
-index c587133..8cf0e29 100644
+index cfca32b..f329401 100644
 --- a/fs/namespace.c
 +++ b/fs/namespace.c
-@@ -46,7 +46,6 @@ extern bool susfs_is_current_ksu_domain(void);
+@@ -39,9 +39,7 @@ extern bool susfs_is_current_ksu_domain(void);
  extern bool susfs_is_current_zygote_domain(void);
  extern bool susfs_is_boot_completed_triggered;
  
 -static DEFINE_IDA(susfs_ksu_mnt_id_ida);
  static DEFINE_IDA(susfs_ksu_mnt_group_ida);
+-static int susfs_mnt_id_start = DEFAULT_KSU_MNT_ID;
+ static int susfs_mnt_group_start = DEFAULT_KSU_MNT_GROUP_ID;
  
  #define CL_COPY_MNT_NS BIT(25) /* used by copy_mnt_ns() */
-@@ -57,7 +56,7 @@ extern void susfs_auto_add_sus_ksu_default_mount(const char __user *to_pathname)
+@@ -52,7 +50,7 @@ extern void susfs_auto_add_sus_ksu_default_mount(const char __user *to_pathname)
  bool susfs_is_auto_add_sus_ksu_default_mount_enabled = true;
  #endif
  #ifdef CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT
@@ -19,7 +21,7 @@ index c587133..8cf0e29 100644
  bool susfs_is_auto_add_sus_bind_mount_enabled = true;
  #endif
  #ifdef CONFIG_KSU_SUSFS_AUTO_ADD_TRY_UMOUNT_FOR_BIND_MOUNT
-@@ -131,18 +130,6 @@ static inline struct hlist_head *mp_hash(struct dentry *dentry)
+@@ -129,25 +127,6 @@ static inline struct hlist_head *mp_hash(struct dentry *dentry)
  	return &mountpoint_hashtable[tmp & mp_hash_mask];
  }
  
@@ -27,40 +29,52 @@ index c587133..8cf0e29 100644
 -// Our own mnt_alloc_id() that assigns mnt_id starting from DEFAULT_KSU_MNT_ID
 -static int susfs_mnt_alloc_id(struct mount *mnt)
 -{
--	int res = ida_alloc_min(&susfs_ksu_mnt_id_ida, DEFAULT_KSU_MNT_ID, GFP_KERNEL);
+-	int res;
 -
--	if (res < 0)
--		return res;
--	mnt->mnt_id = res;
--	return 0;
+-retry:
+-	ida_pre_get(&susfs_ksu_mnt_id_ida, GFP_KERNEL);
+-	spin_lock(&mnt_id_lock);
+-	res = ida_get_new_above(&susfs_ksu_mnt_id_ida, susfs_mnt_id_start, &mnt->mnt_id);
+-	if (!res)
+-		susfs_mnt_id_start = mnt->mnt_id + 1;
+-	spin_unlock(&mnt_id_lock);
+-	if (res == -EAGAIN)
+-		goto retry;
+-
+-	return res;
 -}
 -#endif
  static int mnt_alloc_id(struct mount *mnt)
  {
- 	int res = ida_alloc(&mnt_id_ida, GFP_KERNEL);
-@@ -156,15 +143,14 @@ static int mnt_alloc_id(struct mount *mnt)
- static void mnt_free_id(struct mount *mnt)
+ 	int res;
+@@ -169,20 +148,15 @@ static void mnt_free_id(struct mount *mnt)
  {
+ 	int id = mnt->mnt_id;
  #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 -	/* - We should keep checking mnt->mnt.susfs_mnt_id_backup if it was set.
 -	 * - Then check if mnt->mnt_id is >= DEFAULT_KSU_MNT_ID.
 -	 */
 -	if (mnt->mnt.susfs_mnt_id_backup) {
--		ida_free(&mnt_id_ida, mnt->mnt.susfs_mnt_id_backup);
+-		spin_lock(&mnt_id_lock);
+-		ida_remove(&mnt_id_ida, mnt->mnt.susfs_mnt_id_backup);
+-		if (susfs_mnt_id_start > mnt->mnt_id)
+-			susfs_mnt_id_start = mnt->mnt_id;
+-		spin_unlock(&mnt_id_lock);
 +	// First we have to check if susfs_mnt_id_backup == DEFAULT_KSU_MNT_ID,
 +	// if so, no need to free.
 +	if (mnt->mnt.susfs_mnt_id_backup == DEFAULT_KSU_MNT_ID) {
  		return;
  	}
 -	if (mnt->mnt_id >= DEFAULT_KSU_MNT_ID) {
--		ida_free(&susfs_ksu_mnt_id_ida, mnt->mnt_id);
 +	// Second if susfs_mnt_id_backup was set after mnt_id reorder, free it if so.
 +	if (likely(mnt->mnt.susfs_mnt_id_backup)) {
-+		ida_free(&mnt_id_ida, mnt->mnt.susfs_mnt_id_backup);
- 		return;
- 	}
- #endif
-@@ -266,6 +252,60 @@ static void drop_mountpoint(struct fs_pin *p)
+ 		spin_lock(&mnt_id_lock);
+-		ida_remove(&susfs_ksu_mnt_id_ida, mnt->mnt_id);
++		ida_remove(&mnt_id_ida, mnt->mnt.susfs_mnt_id_backup);
+ 		if (mnt_id_start > mnt->mnt.susfs_mnt_id_backup)
+ 			mnt_id_start = mnt->mnt.susfs_mnt_id_backup;
+ 		spin_unlock(&mnt_id_lock);
+@@ -294,6 +268,60 @@ static void drop_mountpoint(struct fs_pin *p)
  	mntput(&m->mnt);
  }
  
@@ -121,7 +135,7 @@ index c587133..8cf0e29 100644
  #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
  /* A copy of alloc_vfsmnt() but allocates the fake mnt_id to mnt */
  static struct mount *susfs_alloc_sus_vfsmnt(const char *name)
-@@ -1163,13 +1203,25 @@ static struct mount *clone_mnt(struct mount *old, struct dentry *root,
+@@ -1250,13 +1278,25 @@ static struct mount *clone_mnt(struct mount *old, struct dentry *root,
  #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
  	// We won't check it anymore if boot-completed stage is triggered.
  	if (susfs_is_boot_completed_triggered) {
@@ -150,10 +164,12 @@ index c587133..8cf0e29 100644
  #endif
  	mnt = alloc_vfsmnt(old->mnt_devname);
  #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
-@@ -2422,11 +2474,10 @@ static int do_loopback(struct path *path, const char *old_name,
+@@ -2565,13 +2605,10 @@ static int do_loopback(struct path *path, const char *old_name,
+ 		unlock_mount_hash();
+ 	}
  #if defined(CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT) || defined(CONFIG_KSU_SUSFS_AUTO_ADD_TRY_UMOUNT_FOR_BIND_MOUNT)
- 	// Check if bind mounted path should be hidden and umounted automatically.
- 	// And we target only process with ksu domain.
+-	// Check if bind mounted path should be hidden and umounted automatically.
+-	// And we target only process with ksu domain.
 -	if (!susfs_is_boot_completed_triggered && susfs_is_current_ksu_domain()) {
 +	if (susfs_is_current_ksu_domain()) {
  #if defined(CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT)
@@ -165,7 +181,7 @@ index c587133..8cf0e29 100644
  		}
  #endif
  #if defined(CONFIG_KSU_SUSFS_AUTO_ADD_TRY_UMOUNT_FOR_BIND_MOUNT)
-@@ -2435,9 +2486,6 @@ static int do_loopback(struct path *path, const char *old_name,
+@@ -2580,9 +2617,6 @@ static int do_loopback(struct path *path, const char *old_name,
  		}
  #endif
  	}
@@ -175,16 +191,7 @@ index c587133..8cf0e29 100644
  #endif // #if defined(CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT) || defined(CONFIG_KSU_SUSFS_AUTO_ADD_TRY_UMOUNT_FOR_BIND_MOUNT)
  
  out2:
-@@ -3054,7 +3102,7 @@ long do_mount(const char *dev_name, const char __user *dir_name,
- 				      dev_name, data_page);
- #ifdef CONFIG_KSU_SUSFS_AUTO_ADD_SUS_KSU_DEFAULT_MOUNT
- 	// For both Legacy and Magic Mount KernelSU
--	if (!retval && susfs_is_auto_add_sus_ksu_default_mount_enabled &&
-+	if (!susfs_is_boot_completed_triggered && !retval && susfs_is_auto_add_sus_ksu_default_mount_enabled &&
- 			(!(flags & (MS_REMOUNT | MS_BIND | MS_SHARED | MS_PRIVATE | MS_SLAVE | MS_UNBINDABLE)))) {
- 		if (susfs_is_current_ksu_domain()) {
- 			susfs_auto_add_sus_ksu_default_mount(dir_name);
-@@ -3157,7 +3205,9 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
+@@ -3289,7 +3323,9 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
  	copy_flags = CL_COPY_UNBINDABLE | CL_EXPIRE;
  	if (user_ns != ns->user_ns)
  		copy_flags |= CL_SHARED_TO_SLAVE | CL_UNPRIVILEGED;
@@ -195,7 +202,7 @@ index c587133..8cf0e29 100644
  	new = copy_tree(old, old->mnt.mnt_root, copy_flags);
  	if (IS_ERR(new)) {
  		namespace_unlock();
-@@ -3757,6 +3807,10 @@ void susfs_reorder_mnt_id(void) {
+@@ -3883,6 +3919,10 @@ void susfs_reorder_mnt_id(void) {
  	get_mnt_ns(mnt_ns);
  	first_mnt_id = list_first_entry(&mnt_ns->list, struct mount, mnt_list)->mnt_id;
  	list_for_each_entry(mnt, &mnt_ns->list, mnt_list) {
@@ -207,7 +214,7 @@ index c587133..8cf0e29 100644
  		mnt->mnt_id = first_mnt_id++;
  	}
 diff --git a/fs/susfs.c b/fs/susfs.c
-index de54120..0f66cae 100644
+index 5d2efd6..a5b2fa3 100644
 --- a/fs/susfs.c
 +++ b/fs/susfs.c
 @@ -542,26 +542,24 @@ int susfs_add_sus_mount(struct st_susfs_sus_mount* __user user_info) {
@@ -359,7 +366,7 @@ index c4167fd..80cf724 100644
  /* spoof_uname */
  #ifdef CONFIG_KSU_SUSFS_SPOOF_UNAME
 diff --git a/include/linux/susfs_def.h b/include/linux/susfs_def.h
-index a5b9d37..6d5257e 100644
+index 20981ac..2eb8791 100644
 --- a/include/linux/susfs_def.h
 +++ b/include/linux/susfs_def.h
 @@ -34,9 +34,9 @@

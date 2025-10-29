@@ -7,34 +7,29 @@ runs:
         if: env.SUSFS_ENABLE == 'true'
         shell: bash
         run: |
-          # Check SuSFS
           cd $GITHUB_WORKSPACE/device_kernel/
-          
-          if grep -q "CONFIG_KSU" "fs/exec.c"; then
-            echo "Checked SuSFS Patched, Skip."
-          else
-            # Variable
-            SUSFS_SOURCE=https://gitlab.com/simonpunk/susfs4ksu.git
-            SUSFS_BRANCH=kernel-${{ env.KERNEL_VERSION }}
 
-            # Core
-            if [[ "${{ env.SUSFS_FIXED }}" == true ]]; then
-              if [ -z "${{ env.PATCHES_SOURCE }}" ] || [ -z "${{ env.PATCHES_BRANCH }}" ]; then
-                echo "Please input vaild source and branch!"
-                false
-              elif [[ "${{ env.PATCHES_SOURCE }}" == *".git" ]]; then
-                echo "Please do not set a full URL in PATCH_SOURCE!"
-                false
-              else
-                git clone https://github.com/${{ env.PATCHES_SOURCE }}.git -b ${{ env.PATCHES_BRANCH }} NonGKI_Kernel_Patches --depth=1 # It's not necessary.
-              fi
+          # Variable
+          SUSFS_SOURCE=https://gitlab.com/simonpunk/susfs4ksu.git
+          SUSFS_BRANCH=kernel-${{ env.KERNEL_VERSION }}
+
+          # Core
+          if [[ "${{ env.SUSFS_FIXED }}" == true ]]; then
+            if [ -z "${{ env.PATCHES_SOURCE }}" ] || [ -z "${{ env.PATCHES_BRANCH }}" ]; then
+              echo "Please input vaild source and branch!"
+              false
+            elif [[ "${{ env.PATCHES_SOURCE }}" == *".git" ]]; then
+              echo "Please do not set a full URL in PATCH_SOURCE!"
+              false
+            else
+              git clone https://github.com/${{ env.PATCHES_SOURCE }}.git -b ${{ env.PATCHES_BRANCH }} NonGKI_Kernel_Patches --depth=1 # It's not necessary.
             fi
-            git clone $SUSFS_SOURCE -b $SUSFS_BRANCH susfs4ksu --depth=1
-
-            # Copy
-            cp susfs4ksu/kernel_patches/fs/* fs/
-            cp susfs4ksu/kernel_patches/include/linux/* include/linux/
           fi
+          git clone $SUSFS_SOURCE -b $SUSFS_BRANCH susfs4ksu --depth=1
+
+          # Copy
+          cp susfs4ksu/kernel_patches/fs/* fs/
+          cp susfs4ksu/kernel_patches/include/linux/* include/linux/
 
       - name: Set KSU and SUSFS for DEFCONFIG
         if: env.SUSFS_ENABLE == 'true'
@@ -57,6 +52,8 @@ runs:
           echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> ./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
           echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> ./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
           echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> ./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
+          echo "CONFIG_KSU_SUSFS_SUS_MAP=y" >> ./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
+          echo "# CONFIG_KSU_SUSFS_SUS_SU is not set" >> ./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
 
       - name: Patch SuSFS
         if: env.SUSFS_ENABLE == 'true'
@@ -78,8 +75,11 @@ runs:
           }
 
           # Check SuSFS
-          if grep -q "CONFIG_KSU" "fs/exec.c"; then
-            echo "Checked SuSFS Patched, Skip."
+          if grep -q "CONFIG_KSU_SUSFS" "fs/namespace.c"; then
+            echo ">>>>>>>>>>>>Check<<<<<<<<<<<<"
+            echo ">Checked SuSFS Patched,Skip.<"
+            echo ">>>>>>>>>>>>>> <<<<<<<<<<<<<<"
+            echo "SUSFS_SKIP=true" >> $GITHUB_ENV
           else
             cp susfs4ksu/kernel_patches/50_add_susfs_in_kernel-${{ env.KERNEL_VERSION }}.patch ./
 
@@ -113,7 +113,7 @@ runs:
           fi
 
       - name: SUSFS Patch Fixed
-        if: env.SUSFS_ENABLE == 'true'
+        if: env.SUSFS_ENABLE == 'true' && env.SUSFS_SKIP != 'true'
         shell: bash
         run: |
           cd $GITHUB_WORKSPACE/device_kernel/
@@ -137,7 +137,7 @@ runs:
           fi
 
       - name: Updated SUSFS Version
-        if: env.SUSFS_ENABLE == 'true' && env.SUSFS_UPDATE == 'true'
+        if: env.SUSFS_ENABLE == 'true' && env.SUSFS_UPDATE == 'true' && env.SUSFS_SKIP != 'true'
         shell: bash
         run: |
           cd $GITHUB_WORKSPACE/device_kernel/
@@ -214,13 +214,19 @@ runs:
           REJ_FOUND "1.5.9"
 
           # Upgrade 1.5.10
-          cp /tmp/Patches/Patch/susfs_upgrade_to_1510_${{ env.KERNEL_VERSION }}.patch ./
-          patch -p1 < susfs_upgrade_to_1510_${{ env.KERNEL_VERSION }}.patch || true
-          echo "================="
-          echo "=Upgraded 1.5.10="
-          echo "================="
+          if grep -q "CMD_SUSFS_ENABLE_AVC_LOG_SPOOFING" "drivers/kernelsu/core_hook.c"; then
+            cp /tmp/Patches/Patch/susfs_upgrade_to_1510_${{ env.KERNEL_VERSION }}.patch ./
+            patch -p1 < susfs_upgrade_to_1510_${{ env.KERNEL_VERSION }}.patch || true
+            echo "================="
+            echo "=Upgraded 1.5.10="
+            echo "================="
 
-          REJ_FOUND "1.5.10"
+            REJ_FOUND "1.5.10"
+          else
+            echo "============================================================"
+            echo "=Your kernelsu fork cannot supported SuSFS 1.5.10, Skipped.="
+            echo "============================================================"
+          fi
 
           # Upgrade 1.5.11
           if grep -q "susfs_reorder_mnt_id" "drivers/kernelsu/core_hook.c"; then
@@ -232,20 +238,43 @@ runs:
 
             REJ_FOUND "1.5.11"
           else
-            echo "Your kernelsu fork cannot supported SuSFS 1.5.11, Skipped."
+            echo "============================================================"
+            echo "=Your kernelsu fork cannot supported SuSFS 1.5.11, Skipped.="
+            echo "============================================================"
           fi
-          
-          # Upgrade 1.5.12
-          cp /tmp/Patches/Patch/susfs_upgrade_to_1512_${{ env.KERNEL_VERSION }}.patch ./
-          patch -p1 < susfs_upgrade_to_1512_${{ env.KERNEL_VERSION }}.patch || true
-          echo "================="
-          echo "=Upgraded 1.5.12="
-          echo "================="
 
-          REJ_FOUND "1.5.12"
+          # Upgrade 1.5.12
+          if grep -q "susfs_reorder_mnt_id" "drivers/kernelsu/core_hook.c"; then
+            cp /tmp/Patches/Patch/susfs_upgrade_to_1512_${{ env.KERNEL_VERSION }}.patch ./
+            patch -p1 < susfs_upgrade_to_1512_${{ env.KERNEL_VERSION }}.patch || true
+            echo "================="
+            echo "=Upgraded 1.5.12="
+            echo "================="
+
+            REJ_FOUND "1.5.12"
+          else
+            echo "============================================================"
+            echo "=Your kernelsu fork cannot supported SuSFS 1.5.12, Skipped.="
+            echo "============================================================"
+          fi
+
+          # Upgrade 1.5.13
+          if grep -q "CMD_SUSFS_ADD_SUS_MAP" "drivers/kernelsu/core_hook.c"; then
+            cp /tmp/Patches/Patch/susfs_upgrade_to_1513_${{ env.KERNEL_VERSION }}.patch ./
+            patch -p1 < susfs_upgrade_to_1513_${{ env.KERNEL_VERSION }}.patch || true
+            echo "================="
+            echo "=Upgraded 1.5.13="
+            echo "================="
+
+            REJ_FOUND "1.5.13"
+          else
+            echo "============================================================"
+            echo "=Your kernelsu fork cannot supported SuSFS 1.5.13, Skipped.="
+            echo "============================================================"
+          fi
 
       - name: Updated SUSFS Patch Fixed
-        if: env.SUSFS_ENABLE == 'true' && env.SUSFS_UPDATE == 'true'
+        if: env.SUSFS_ENABLE == 'true' && env.SUSFS_UPDATE == 'true' && env.SUSFS_SKIP != 'true'
         shell: bash
         run: |
           cd $GITHUB_WORKSPACE/device_kernel/
