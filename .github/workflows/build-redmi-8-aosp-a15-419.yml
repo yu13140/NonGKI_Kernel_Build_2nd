@@ -128,7 +128,15 @@ jobs:
 
       - name: 🔒 Patch Kernel of Baseband Guard
         uses: ./.github/workflows/patch-baseband-guard
-        
+      
+      - name: cdto
+        run: |
+          cd $GITHUB_WORKSPACE/device_kernel/security/baseband-guard
+          ls -a .
+          if [[ -d ./.git ]]; then
+            ls -a ./.git
+          fi
+
       - name: Upload Build Artifacts For Packing Error
         uses: actions/upload-artifact@v4
         with:
