@@ -102,7 +102,7 @@ index 5a1b51c..cca3ab6 100644
  				return -ENOENT;
  			}
 diff --git a/fs/namespace.c b/fs/namespace.c
-index 80e1750..66409a4 100644
+index 80e1750..f5ca866 100644
 --- a/fs/namespace.c
 +++ b/fs/namespace.c
 @@ -44,9 +44,10 @@
@@ -296,7 +296,7 @@ index 80e1750..66409a4 100644
  #endif
  		mnt->mnt.data = NULL;
  
-@@ -1055,26 +1099,12 @@ vfs_kern_mount(struct file_system_type *type, int flags, const char *name, void
+@@ -1055,26 +1099,24 @@ vfs_kern_mount(struct file_system_type *type, int flags, const char *name, void
  {
  	struct mount *mnt;
  	struct dentry *root;
@@ -309,22 +309,30 @@ index 80e1750..66409a4 100644
  	if (!type)
  		return ERR_PTR(-ENODEV);
  
--#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
+ #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
 -	// For newly created mounts, the only caller process we care is KSU
 -	if (unlikely(susfs_is_current_ksu_domain())) {
 -		mnt = alloc_vfsmnt(name, true, 0);
--		goto bypass_orig_flow;
--	}
++    // We only check for ksu process
++	if (susfs_is_current_ksu_domain()) {
++		mnt = susfs_alloc_sus_vfsmnt(name);
+ 		goto bypass_orig_flow;
+ 	}
 -	mnt = alloc_vfsmnt(name, false, 0);
 -bypass_orig_flow:
 -#else
++#endif
++
  	mnt = alloc_vfsmnt(name);
--#endif
++
++#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
++bypass_orig_flow:
+ #endif
 +
  	if (!mnt)
  		return ERR_PTR(-ENOMEM);
  
-@@ -1101,28 +1131,6 @@ bypass_orig_flow:
+@@ -1101,28 +1143,6 @@ bypass_orig_flow:
  	mnt->mnt_mountpoint = mnt->mnt.mnt_root;
  	mnt->mnt_parent = mnt;
  
@@ -353,7 +361,7 @@ index 80e1750..66409a4 100644
  	lock_mount_hash();
  	list_add_tail(&mnt->mnt_instance, &root->d_sb->s_mounts);
  	unlock_mount_hash();
-@@ -1153,45 +1161,19 @@ static struct mount *clone_mnt(struct mount *old, struct dentry *root,
+@@ -1153,45 +1173,19 @@ static struct mount *clone_mnt(struct mount *old, struct dentry *root,
  	int err;
  
  #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT
@@ -408,7 +416,7 @@ index 80e1750..66409a4 100644
  #endif
  	if (!mnt)
  		return ERR_PTR(-ENOMEM);
-@@ -1245,31 +1227,6 @@ bypass_orig_flow:
+@@ -1245,31 +1239,6 @@ bypass_orig_flow:
  	mnt->mnt_mountpoint = mnt->mnt.mnt_root;
  	mnt->mnt_parent = mnt;
  
@@ -440,7 +448,7 @@ index 80e1750..66409a4 100644
  	lock_mount_hash();
  	list_add_tail(&mnt->mnt_instance, &sb->s_mounts);
  	unlock_mount_hash();
-@@ -1950,9 +1907,6 @@ struct mount *copy_tree(struct mount *mnt, struct dentry *dentry,
+@@ -1950,9 +1919,6 @@ struct mount *copy_tree(struct mount *mnt, struct dentry *dentry,
  					int flag)
  {
  	struct mount *res, *p, *q, *r, *parent;
@@ -450,7 +458,7 @@ index 80e1750..66409a4 100644
  	
  	if (!(flag & CL_COPY_UNBINDABLE) && IS_MNT_UNBINDABLE(mnt))
  		return ERR_PTR(-EINVAL);
-@@ -1969,9 +1923,7 @@ struct mount *copy_tree(struct mount *mnt, struct dentry *dentry,
+@@ -1969,9 +1935,7 @@ struct mount *copy_tree(struct mount *mnt, struct dentry *dentry,
  	p = mnt;
  	list_for_each_entry(r, &mnt->mnt_mounts, mnt_child) {
  		struct mount *s;
@@ -461,7 +469,7 @@ index 80e1750..66409a4 100644
  		if (!is_subdir(r->mnt_mountpoint, dentry))
  			continue;
  
-@@ -2001,13 +1953,7 @@ struct mount *copy_tree(struct mount *mnt, struct dentry *dentry,
+@@ -2001,13 +1965,7 @@ struct mount *copy_tree(struct mount *mnt, struct dentry *dentry,
  			q = clone_mnt(p, p->mnt.mnt_root, flag);
  			if (IS_ERR(q))
  				goto out;
@@ -476,7 +484,7 @@ index 80e1750..66409a4 100644
  			lock_mount_hash();
  			list_add_tail(&q->mnt_list, &res->mnt_list);
  			attach_mnt(q, parent, p->mnt_mp);
-@@ -2476,7 +2422,7 @@ static int do_loopback(struct path *path, const char *old_name,
+@@ -2476,7 +2434,7 @@ static int do_loopback(struct path *path, const char *old_name,
  #if defined(CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT) || defined(CONFIG_KSU_SUSFS_AUTO_ADD_TRY_UMOUNT_FOR_BIND_MOUNT)
  	// Check if bind mounted path should be hidden and umounted automatically.
  	// And we target only process with ksu domain.
@@ -485,7 +493,7 @@ index 80e1750..66409a4 100644
  #if defined(CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT)
  		if (susfs_is_auto_add_sus_bind_mount_enabled &&
  				susfs_auto_add_sus_bind_mount(old_name, &old_path)) {
-@@ -3192,10 +3138,6 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
+@@ -3192,10 +3150,6 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
  	struct mount *old;
  	struct mount *new;
  	int copy_flags;
@@ -496,7 +504,7 @@ index 80e1750..66409a4 100644
  
  	BUG_ON(!ns);
  
-@@ -3215,10 +3157,6 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
+@@ -3215,10 +3169,6 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
  	copy_flags = CL_COPY_UNBINDABLE | CL_EXPIRE;
  	if (user_ns != ns->user_ns)
  		copy_flags |= CL_SHARED_TO_SLAVE | CL_UNPRIVILEGED;
@@ -507,7 +515,7 @@ index 80e1750..66409a4 100644
  
  	new = copy_tree(old, old->mnt.mnt_root, copy_flags);
  	if (IS_ERR(new)) {
-@@ -3236,12 +3174,7 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
+@@ -3236,12 +3186,7 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
  	 */
  	p = old;
  	q = new;
@@ -521,7 +529,7 @@ index 80e1750..66409a4 100644
  	while (p) {
  		q->mnt_ns = new_ns;
  		new_ns->mounts++;
-@@ -3262,15 +3195,6 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
+@@ -3262,15 +3207,6 @@ struct mnt_namespace *copy_mnt_ns(unsigned long flags, struct mnt_namespace *ns,
  		while (p->mnt.mnt_root != q->mnt.mnt_root)
  			p = next_mnt(p, old);
  	}
@@ -537,7 +545,7 @@ index 80e1750..66409a4 100644
  
  	namespace_unlock();
  
-@@ -3819,24 +3743,24 @@ const struct proc_ns_operations mntns_operations = {
+@@ -3819,24 +3755,24 @@ const struct proc_ns_operations mntns_operations = {
  	.owner		= mntns_owner,
  };
  

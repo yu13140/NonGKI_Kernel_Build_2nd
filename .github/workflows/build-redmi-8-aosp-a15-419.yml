@@ -132,6 +132,7 @@ jobs:
       - name: cdto
         run: |
           cd $GITHUB_WORKSPACE/device_kernel/security/baseband-guard
+          touch ./.git/shallow
           ls -a ./.git
 
       - name: Upload Build Artifacts For Packing Error

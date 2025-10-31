@@ -1,8 +1,7 @@
 | Device | Location | Codename | Kernel/Author/Name | OS | Android | Pack Method | KernelSU | SuSFS | Hook | KPM | Re:Kernel | BBG | Status |  
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|  
 | Oneplus 8 | All | instantnoodle | [4.19/ppajda/XTD](https://github.com/ppajda/android_kernel_oneplus_sm8250) | Oxygen OS 13.1 | 13 | AnyKernel3 | rsuntk | ✅ | Normal | ❌ | ❌ | ❌ | Stable |  
-| Xiaomi Mix2s | All | polaris | [4.9/Evolution-X-Devices/sdm845](https://github.com/Evolution-X-Devices/kernel_xiaomi_sdm845) | Evolution X 10.X | 15 | AnyKernel3 | SukiSU(U) | ✅ | Tracepoint | ✅ | ✅ | ✅ | Stable |  
-| Xiaomi 11 Ultra | All | star | [5.4/EndCredits/Acetaminophen](https://github.com/EndCredits/android_kernel_xiaomi_sm8350-miui) | HyperOS | 14 | Anykernel3 | SukiSU(U) | ✅ | Tracepoint | ❌ | ❌ | ❌ | Stable |  
+| Xiaomi Mix2s | All | polaris | [4.9/Evolution-X-Devices/sdm845](https://github.com/Evolution-X-Devices/kernel_xiaomi_sdm845) | Evolution X 10.X | 15 | AnyKernel3 | SukiSU(U) | ✅ | Tracepoint | ✅ | ✅ | ✅ | Stable |   
 | Redmi K20 Pro | All | raphael | [4.14/SOVIET-ANDROID/SOVIET-STAR-OSS](https://github.com/SOVIET-ANDROID/kernel_xiaomi_raphael) | Based-AOSP | 15 | AnyKernel3 | rsuntk | ✅ | Syscall | ❌ | ❌ | ❌ | Stable |  
 | Samsung Note 10 Plus | EU | d2s | [4.14/Ocin4ever/ExtremeKernel](https://github.com/Ocin4ever/ExtremeKernel) | OneUI 7 | 15 | AnyKernel3 | SukiSU(U) | ✅ | Tracepoint | ❌ | ❌ | ❌ | Stable |  
 | Xiaomi 11 | All | venus | [5.4/kamikaonashi/venus](https://github.com/kamikaonashi/kernel_xiaomi_venus) | Evolution X 11.X | 16 | AnyKernel3 | SukiSU(U) | ✅ | Tracepoint | ✅ | ✅ | ❌ | Stable |  
@@ -15,14 +14,16 @@
 | Smartisan U3 Pro | CN | osborn | [4.4/MoKee/smartisan_sdm660](https://github.com/MoKee/android_kernel_smartisan_sdm660) | Mokee | 7.1.1 | AnyKernel3 | Offical | ❌ | Normal | ❌ | ❌ | ❌ | Testing |  
 | Samsung Note 10 | EU | d1 | [4.14/Ocin4ever/ExtremeKernel](https://github.com/Ocin4ever/ExtremeKernel) | OneUI 7 | 15 | AnyKernel3 | SukiSU(U) | ✅ | Tracepoint | ❌ | ❌ | ❌ | Stable |  
 | Redmi Note 11 Pro 5G | INT | veux | [5.4/dev-sm6375/Nebula](https://github.com/dev-sm6375/kernel_xiaomi_sm6375) | Based AOSP | 16 | AnyKernel3 | SukiSU(U) | ✅ | Normal | ✅ | ❌ | ❌ | Stable |  
-| Oneplus 8 | All | instantnoodle | [4.19/toraidl/los](https://github.com/toraidl/android_kernel_oneplus_sm8250_los) | Color OS 15 | 15 | AnyKernel3 | SukiSU(U) | ✅ | Syscall | ✅ | ❌ | ✅ | Testing |  
+| Oneplus 8 | All | instantnoodle | [4.19/toraidl/los](https://github.com/toraidl/android_kernel_oneplus_sm8250_los) | Color OS 15 | 15 | AnyKernel3 | SukiSU(U) | ✅ | Syscall | ✅ | ❌ | ✅ | Stable |  
 
 **English**:  
 - OnePlus 8 OxygenOS/ColorOS 13.1 has been tested and can be used on the OnePlus 8, 8T, 8 Pro and 9R.
 - Xiaomi Mix 2S EvolutionX 10 has been backported to Cgroup V2 (UID and Freezer) ,Binder (5.15-android13) and LZ4 (Updated to 1.10.0, LZ4K, LZ4K_OPLUS, LZ4KD).
 - Samsung Note 10 Plus is compatible with the Exynos 9850 processor for the EU region. Do not flash this firmware onto Qualcomm-based devices.
+- Redmi 8 is also available for 7A, 8, 8A and 8A Dual.
 
 **Chinese**:  
 - 一加 8 OxygenOS/ColorOS 13.1 经测试8、8T、8 Pro、9R 都可用
 - 小米 Mix2s EvolutionX 10 已移植Cgroup V2 (UID 和 Freezer)、Binder (5.15-android13) 以及 LZ4（更新至1.10.0、LZ4K、LZ4K_OPLUS、LZ4KD）
 - 三星 Note 10+ 适配处理器为猎户座9850，为欧盟地区版本，高通版本请勿刷入
+- 红米8 同样适用于 7A、8、8A 以及 8A Dual
