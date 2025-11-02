@@ -3,7 +3,6 @@ name: Build Redmi 8 (Based-AOSP A15)
 on:
   workflow_call:
   workflow_dispatch:
-  push:
 
 env:
   # Device env
@@ -70,6 +69,8 @@ env:
   
   BASEBAND_GUARD_ENABLE: "true" #if u want prevent unauthorized writes to critical partitions/device nodes.
   BASEBAND_GUARD_BOOT: "false" #if u want to protect boot partition.
+
+  HIDE_STUFF: "true" # hide some of the features
 
   HOOK_METHOD: "syscall" # manual hook method,can choice : normal, syscall and tracepoint.
   HOOK_OLDER: "false" # contain backport older patch and syscall older patch.
