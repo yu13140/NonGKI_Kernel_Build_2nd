@@ -30,8 +30,8 @@ env:
   DEFCONFIG_ORIGIN_IMAGE: ""
   DEFCONFIG_FROM_BOOT: false
 
-  KERNELSU_SOURCE : ""
-  KERNELSU_BRANCH : ""
+  KERNELSU_SOURCE : "https://raw.githubusercontent.com/JJ-coffee/KernelSU-Next/next/kernel/setup.sh"
+  KERNELSU_BRANCH : "next-susfs"
 
   KERNELSU_AUTO_GET : "false" # if u want easy setting kernelsu, u can true.
   KERNELSU_AUTO_FORK : "next" # magic, rsuntk and sukisu
@@ -55,7 +55,7 @@ env:
 
   PACK_METHOD: "Anykernel3" # Anykernel3 need SOURCE and BRANCH, MKBOOTIMG needn't it.
 
-  KERNELSU_METHOD: "shell" # shell, manual and only.
+  KERNELSU_METHOD: "only" # shell, manual and only.
 
   PATCHES_SOURCE: "" # [your_name]/[your_patch] -> gooder123/NonGKI_Patcher
   PATCHES_BRANCH: "" # [your_branch] -> main
@@ -125,6 +125,9 @@ jobs:
 
       - name: 🔒 Patch Kernel of Baseband Guard
         uses: ./.github/workflows/patch-baseband-guard
+
+      - name: 🔧 Patch Hide Stuff
+        uses: ./.github/workflows/patch-hide-stuff
 
       - name: 🚀 Build Process
         uses: ./.github/workflows/build-process

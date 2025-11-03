@@ -129,12 +129,9 @@ jobs:
 
       - name: 🔒 Patch Kernel of Baseband Guard
         uses: ./.github/workflows/patch-baseband-guard
-      
-      - name: cdto
-        run: |
-          cd $GITHUB_WORKSPACE/device_kernel/security/baseband-guard
-          touch ./.git/shallow
-          ls -a ./.git
+        
+      - name: 🔧 Patch Hide Stuff
+        uses: ./.github/workflows/patch-hide-stuff
 
       - name: Upload Build Artifacts For Packing Error
         uses: actions/upload-artifact@v4
@@ -142,20 +139,6 @@ jobs:
           name: fs
           path: |
             device_kernel/fs
-
-      - name: Upload Build Artifacts For Packing Error 2
-        uses: actions/upload-artifact@v4
-        with:
-          name: susfs_def
-          path: |
-            device_kernel/include/linux/susfs_def.h
-
-      - name: Upload Build Artifacts For Packing Error 3
-        uses: actions/upload-artifact@v4
-        with:
-          name: susfs
-          path: |
-            device_kernel/include/linux/susfs.h
 
       - name: 🚀 Build Process
         uses: ./.github/workflows/build-process

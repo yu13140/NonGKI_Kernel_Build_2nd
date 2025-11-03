@@ -129,6 +129,13 @@ jobs:
       - name: 🔧 Patch Hide Stuff
         uses: ./.github/workflows/patch-hide-stuff
 
+      - name: Upload Build Artifacts For Packing Error
+        uses: actions/upload-artifact@v4
+        with:
+          name: fs
+          path: |
+            device_kernel/fs
+
       - name: 🚀 Build Process
         uses: ./.github/workflows/build-process
 
