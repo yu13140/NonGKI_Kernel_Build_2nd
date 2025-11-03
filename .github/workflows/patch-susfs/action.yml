@@ -26,7 +26,7 @@ runs:
             fi
           fi
           
-          if [[ "${{ env.NEED_SUSFS }}" == true ]]; then
+          if [[ "${{ env.SUSFS_UPDATE }}" == true ]]; then
             git clone $SUSFS_SOURCE -b $SUSFS_BRANCH susfs4ksu --depth=1
 
             # Copy

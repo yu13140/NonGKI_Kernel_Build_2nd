@@ -37,7 +37,6 @@ env:
   KERNELSU_AUTO_FORK : "next" # magic, rsuntk and sukisu
 
   SUSFS_ENABLE : true
-  NEED_SUSFS : false
   SUSFS_FIXED : false
   SUSFS_UPDATE : false
 
@@ -137,5 +136,4 @@ jobs:
         uses: ./.github/workflows/pack-process
 
       - name: ✏️ Upload Artifacts
-        id: build
         uses: ./.github/workflows/upload-files
