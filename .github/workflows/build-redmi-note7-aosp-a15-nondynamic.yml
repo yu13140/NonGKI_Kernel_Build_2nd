@@ -3,6 +3,7 @@ name: Build Redmi Note 7 (Based AOSP A15) (Non-Dynamic)
 on:
   workflow_call:
   workflow_dispatch:
+  push:
 
 env:
   # Device env
@@ -29,11 +30,10 @@ env:
   DEFCONFIG_ORIGIN_IMAGE: ""
   DEFCONFIG_FROM_BOOT: false
 
-  KERNELSU_SOURCE : ""
-  KERNELSU_BRANCH : ""
-  KERNELSU_NAME : ""
+  KERNELSU_SOURCE : "https://raw.githubusercontent.com/JJ-coffee/KernelSU-Next/next/kernel/setup.sh"
+  KERNELSU_BRANCH : "next-susfs"
 
-  KERNELSU_AUTO_GET : "true" # if u want easy setting kernelsu, u can true.
+  KERNELSU_AUTO_GET : "false" # if u want easy setting kernelsu, u can true.
   KERNELSU_AUTO_FORK : "next" # magic, rsuntk and sukisu
 
   SUSFS_ENABLE : true
@@ -80,7 +80,7 @@ env:
   GENERATE_DTB: "false" # if u kernel need DTB , but cannot auto generate it. (Only Anykernel3).
   GENERATE_CHIP: "qcom" # only supported for qcom and mediatek.
 
-  BUILD_DEBUGGER: "false" # Output build errors.
+  BUILD_DEBUGGER: "true" # Output build errors.
   SKIP_PATCH: "true" # Ignore errors found in Patch Debugger.
 
   BUILD_OTHER_CONFIG: "false" # Merge config files.
