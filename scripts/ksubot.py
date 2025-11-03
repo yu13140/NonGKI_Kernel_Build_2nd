@@ -2,7 +2,6 @@ import asyncio
 import os
 import sys
 from telethon import TelegramClient
-import json
 
 API_ID = 611335
 API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
@@ -25,7 +24,6 @@ if COMMIT_MESSAGE:
 else:
     commit_message = ''
 
-# 生成提交链接
 if COMMIT_URL:
     commit_line = f'[Commit]({COMMIT_URL})\n'
 else:
