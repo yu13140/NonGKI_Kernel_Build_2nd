@@ -7,46 +7,29 @@ import json
 API_ID = 611335
 API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
 
-
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = os.environ.get("CHAT_ID")
 MESSAGE_THREAD_ID = os.environ.get("MESSAGE_THREAD_ID")
 RUN_URL = os.environ.get("RUN_URL")
 TIME = os.environ.get("TIME")
+REPOSITORY = os.environ.get("REPOSITORY")
+AUTHOR = os.environ.get("AUTHOR")
+COMMIT_MESSAGE = os.environ.get("COMMIT_MESSAGE", "")
+COMMIT_URL = os.environ.get("COMMIT_URL", "")
 
-GITHUB_EVENT = json.loads(os.environ.get("GITHUB_EVENT"))
-
-if 'commits' in GITHUB_EVENT:
-    commits = GITHUB_EVENT['commits']
-    commit_message = ''
-    i = len(commits)
-    for commit in commits[::-1]:
-        msg = commit['message']
-        if len(msg) > 256:
-            msg = msg[:253] + '...'
-        if len(msg) + 1 + len(commit_message) > 980:
-            commit_message = f'(other {i} commits)\n{commit_message}'
-        else:
-            commit_message = f'{msg}\n{commit_message}'
-        i -= 1
-    commit_message = f'```\n{commit_message.strip()}\n```'
-elif 'head_commit' in GITHUB_EVENT:
-    msg = GITHUB_EVENT["head_commt"]["msg"]
-    if len(msg) > 256:
-        msg = msg[:253] + '...'
-    commit_message = f'```\n{msg.strip()}\n```\n'
+if COMMIT_MESSAGE:
+    first_line = COMMIT_MESSAGE.split('\n')[0]
+    if len(first_line) > 256:
+        first_line = first_line[:253] + '...'
+    commit_message = f'```\n{first_line.strip()}\n```'
 else:
     commit_message = ''
 
-if 'compare' in GITHUB_EVENT:
-    commit_url = GITHUB_EVENT['compare']
-    commit_line = '[Compare](' + commit_url + ')\n'
-elif 'head_commit' in GITHUB_EVENT:
-    commit_url = GITHUB_EVENT['head_commit']['url']
-    commit_line = '[Commit](' + commit_url + ')\n'
+# 生成提交链接
+if COMMIT_URL:
+    commit_line = f'[Commit]({COMMIT_URL})\n'
 else:
     commit_line = ''
-
 
 MSG_TEMPLATE = """
 **✅ Kernel is built!**
@@ -55,13 +38,15 @@ MSG_TEMPLATE = """
 💬 Commit: {commit_message}
 👤 Author: {author}
 ⏰ Time: {time}
+
 {commit_url}[Workflow run]({run_url})
 """.strip()
 
-
 def get_caption():
     msg = MSG_TEMPLATE.format(
+        repository=REPOSITORY,
         commit_message=commit_message,
+        author=AUTHOR,
         commit_url=commit_line,
         run_url=RUN_URL,
         time=TIME,
@@ -69,7 +54,6 @@ def get_caption():
     if len(msg) > 1024:
         return RUN_URL
     return msg
-
 
 def check_environ():
     global CHAT_ID, MESSAGE_THREAD_ID
@@ -91,11 +75,10 @@ def check_environ():
         try:
             MESSAGE_THREAD_ID = int(MESSAGE_THREAD_ID)
         except:
-            print("[-] Invaild MESSAGE_THREAD_ID")
+            print("[-] Invalid MESSAGE_THREAD_ID")
             exit(1)
     else:
         MESSAGE_THREAD_ID = None
-
 
 async def main():
     print("[+] Uploading to telegram")
