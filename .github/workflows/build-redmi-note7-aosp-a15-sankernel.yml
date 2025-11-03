@@ -37,6 +37,7 @@ env:
   KERNELSU_AUTO_FORK : "next" # magic, rsuntk and sukisu
 
   SUSFS_ENABLE : true
+  NEED_SUSFS : false
   SUSFS_FIXED : false
   SUSFS_UPDATE : false
 

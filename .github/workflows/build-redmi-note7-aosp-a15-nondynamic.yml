@@ -87,6 +87,8 @@ env:
   MERGE_CONFIG_FILES: ""
 
   FREE_MORE_SPACE: "false" # if u want get more space, enabled it.
+  
+  UPLOAD_TG: "true"
 
 jobs:
   build-kernel:
@@ -146,7 +148,7 @@ jobs:
         uses: ./.github/workflows/upload-files
         
       - name: Bot session cache
-        if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true'
+        if: env.UPLOAD_TG == 'true'
         id: bot_session_cache
         uses: actions/cache@v4
         with:
@@ -154,7 +156,7 @@ jobs:
           key: ${{ runner.os }}-bot-session
 
       - name: Upload to telegram
-        if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true'
+        if: env.UPLOAD_TG == 'true'
         env:
           CHAT_ID: ${{ vars.CHAT_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
@@ -167,6 +169,6 @@ jobs:
         run: |
           if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
             pip3 install telethon
-            export TIME=$(date '+%Y-%m-%d %H:%M:%S') >> $GITHUB_ENV
+            export TIME=$(date '+%Y-%m-%d %H:%M:%S')
             python3 $GITHUB_WORKSPACE/scripts/ksubot.py $GITHUB_WORKSPACE/device_kernel/${{ env.PACK_NAME }}
           fi
