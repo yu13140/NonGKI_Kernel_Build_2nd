@@ -144,3 +144,29 @@ jobs:
 
       - name: ✏️ Upload Artifacts
         uses: ./.github/workflows/upload-files
+        
+      - name: Bot session cache
+        if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true'
+        id: bot_session_cache
+        uses: actions/cache@v4
+        with:
+          path: scripts/ksubot.session
+          key: ${{ runner.os }}-bot-session
+
+      - name: Upload to telegram
+        if: github.event_name != 'pull_request' && steps.need_upload.outputs.UPLOAD == 'true'
+        env:
+          CHAT_ID: ${{ vars.CHAT_ID }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          MESSAGE_THREAD_ID: 25
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          COMMIT_URL: ${{ github.event.head_commit.url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          REPOSITORY: ${{ github.repository }}
+          AUTHOR: ${{ github.event.head_commit.author.name }}
+        run: |
+          if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
+            pip3 install telethon
+            export TIME=$(date '+%Y-%m-%d %H:%M:%S') >> $GITHUB_ENV
+            python3 $GITHUB_WORKSPACE/scripts/ksubot.py $GITHUB_WORKSPACE/device_kernel/${{ env.PACK_NAME }}
+          fi
