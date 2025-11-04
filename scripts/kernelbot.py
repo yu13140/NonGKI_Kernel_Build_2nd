@@ -43,12 +43,12 @@ MSG_TEMPLATE = """
 
 def get_caption():
     msg = MSG_TEMPLATE.format(
-        repository=REPOSITORY,
+        repository=REPOSITORY or "Unknown Repository",
         commit_message=commit_message,
-        author=AUTHOR,
+        author=AUTHOR or "Unknown",
         commit_url=commit_line,
         run_url=RUN_URL,
-        time=TIME,
+        time=TIME or "Unknown",
     )
     if len(msg) > 1024:
         return RUN_URL
@@ -56,53 +56,83 @@ def get_caption():
 
 def check_environ():
     global CHAT_ID, MESSAGE_THREAD_ID
-    if BOT_TOKEN is None:
-        print("[-] Invalid BOT_TOKEN")
+    
+    required_vars = {
+        "BOT_TOKEN": BOT_TOKEN,
+        "CHAT_ID": CHAT_ID,
+        "RUN_URL": RUN_URL
+    }
+    
+    for var_name, var_value in required_vars.items():
+        if var_value is None:
+            print(f"[-] Invalid {var_name}")
+            exit(1)
+    
+    try:
+        CHAT_ID = int(CHAT_ID)
+    except (ValueError, TypeError):
+        print("[-] Invalid CHAT_ID format")
         exit(1)
-    if CHAT_ID is None:
-        print("[-] Invalid CHAT_ID")
-        exit(1)
-    else:
-        try:
-            CHAT_ID = int(CHAT_ID)
-        except:
-            pass
-    if RUN_URL is None:
-        print("[-] Invalid RUN_URL")
-        exit(1)
+    
     if MESSAGE_THREAD_ID is not None and MESSAGE_THREAD_ID != "":
         try:
             MESSAGE_THREAD_ID = int(MESSAGE_THREAD_ID)
-        except:
-            print("[-] Invalid MESSAGE_THREAD_ID")
+        except (ValueError, TypeError):
+            print("[-] Invalid MESSAGE_THREAD_ID format")
             exit(1)
     else:
         MESSAGE_THREAD_ID = None
 
 async def main():
-    print("[+] Uploading to telegram")
+    print("[+] Starting Telegram upload process")
     check_environ()
+    
     files = sys.argv[1:]
-    print("[+] Files:", files)
+    print(f"[+] Files to upload: {files}")
+    
     if len(files) <= 0:
         print("[-] No files to upload")
         exit(1)
-    print("[+] Logging in Telegram with bot")
+    
+    print("[+] Logging in to Telegram with bot")
     script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
     session_dir = os.path.join(script_dir, "ksubot")
-    async with await TelegramClient(session=session_dir, api_id=API_ID, api_hash=API_HASH).start(bot_token=BOT_TOKEN) as bot:
-        caption = [""] * len(files)
-        caption[-1] = get_caption()
-        print("[+] Caption: ")
-        print("---")
-        print(caption)
-        print("---")
-        print("[+] Sending")
-        await bot.send_file(entity=CHAT_ID, file=files, caption=caption, reply_to=MESSAGE_THREAD_ID, parse_mode="markdown")
-        print("[+] Done!")
+    
+    try:
+        async with await TelegramClient(
+            session=session_dir, 
+            api_id=API_ID, 
+            api_hash=API_HASH
+        ).start(bot_token=BOT_TOKEN) as bot:
+            
+            caption = [""] * len(files)
+            final_caption = get_caption()
+            caption[-1] = final_caption
+            
+            print("[+] Caption content:")
+            print("---")
+            print(final_caption)
+            print("---")
+            
+            print("[+] Sending files to Telegram")
+            await bot.send_file(
+                entity=CHAT_ID, 
+                file=files, 
+                caption=caption, 
+                reply_to=MESSAGE_THREAD_ID, 
+                parse_mode="markdown"
+            )
+            print("[+] Upload completed successfully!")
+            
+    except Exception as e:
+        print(f"[-] Telegram API error: {e}")
+        exit(1)
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\n[-] Operation cancelled by user")
     except Exception as e:
-        print(f"[-] An error occurred: {e}")
+        print(f"[-] An unexpected error occurred: {e}")
+        exit(1)
