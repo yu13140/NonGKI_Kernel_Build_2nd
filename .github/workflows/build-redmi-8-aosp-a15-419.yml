@@ -169,3 +169,4 @@ jobs:
             export NTIME=$(date '+%Y-%m-%d %H:%M:%S')
             python3 $GITHUB_WORKSPACE/scripts/kernelbot.py $GITHUB_WORKSPACE/device_kernel/${{ env.PACK_NAME }}
           fi
+
