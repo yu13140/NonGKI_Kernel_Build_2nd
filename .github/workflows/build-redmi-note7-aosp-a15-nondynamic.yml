@@ -3,6 +3,7 @@ name: Build Redmi Note 7 (Based AOSP A15) (Non-Dynamic)
 on:
   workflow_call:
   workflow_dispatch:
+  push:
 
 env:
   # Device env
@@ -13,7 +14,7 @@ env:
   EXTRA_CMDS : "LD=ld.lld LLVM=1 LLVM_IAS=1"
 
   KERNEL_SOURCE : "https://github.com/yu13140/android_kernel_xiaomi_southwest-4.19.git"
-  KERNEL_BRANCH : "lz4kd_oplus"
+  KERNEL_BRANCH : "lz4k_oplus"
 
   CLANG_SOURCE : "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-Linux-X64.tar.xz"
   CLANG_BRANCH : ""
@@ -160,5 +161,5 @@ jobs:
           if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
             pip3 install telethon
             export TIME=$(date '+%Y-%m-%d %H:%M:%S')
-            python3 $GITHUB_WORKSPACE/scripts/ksubot.py $GITHUB_WORKSPACE/device_kernel/${{ env.PACK_NAME }}
+            python3 $GITHUB_WORKSPACE/scripts/kernelbot.py $GITHUB_WORKSPACE/device_kernel/${{ env.PACK_NAME }}
           fi

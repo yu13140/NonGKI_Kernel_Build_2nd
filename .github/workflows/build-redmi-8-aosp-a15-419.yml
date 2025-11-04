@@ -166,5 +166,5 @@ jobs:
           if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
             pip3 install telethon
             export TIME=$(date '+%Y-%m-%d %H:%M:%S')
-            python3 $GITHUB_WORKSPACE/scripts/ksubot.py $GITHUB_WORKSPACE/device_kernel/${{ env.PACK_NAME }}
+            python3 $GITHUB_WORKSPACE/scripts/kernelbot.py $GITHUB_WORKSPACE/device_kernel/${{ env.PACK_NAME }}
           fi
