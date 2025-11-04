@@ -145,6 +145,7 @@ jobs:
 
       - name: Bot session cache
         if: "!contains(github.event.head_commit.message, '[skip ci]')"
+        shell: bash
         id: bot_session_cache
         uses: actions/cache@v4
         with:
@@ -153,6 +154,7 @@ jobs:
 
       - name: Upload to telegram
         if: "!contains(github.event.head_commit.message, '[skip ci]')"
+        shell: bash
         env:
           CHAT_ID: ${{ vars.CHAT_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
@@ -165,6 +167,6 @@ jobs:
         run: |
           if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
             pip3 install telethon
-            export TIME=$(date '+%Y-%m-%d %H:%M:%S')
+            export NTIME=$(date '+%Y-%m-%d %H:%M:%S')
             python3 $GITHUB_WORKSPACE/scripts/kernelbot.py $GITHUB_WORKSPACE/device_kernel/${{ env.PACK_NAME }}
           fi

@@ -3,7 +3,6 @@ name: Build Redmi Note 7 (Based AOSP A15) (Non-Dynamic)
 on:
   workflow_call:
   workflow_dispatch:
-  push:
 
 env:
   # Device env
@@ -160,6 +159,6 @@ jobs:
         run: |
           if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
             pip3 install telethon
-            export TIME=$(date '+%Y-%m-%d %H:%M:%S')
+            export NTIME=$(date '+%Y-%m-%d %H:%M:%S')
             python3 $GITHUB_WORKSPACE/scripts/kernelbot.py $GITHUB_WORKSPACE/device_kernel/${{ env.PACK_NAME }}
           fi
