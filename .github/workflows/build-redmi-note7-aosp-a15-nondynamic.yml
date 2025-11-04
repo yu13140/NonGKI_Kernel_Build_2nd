@@ -3,7 +3,6 @@ name: Build Redmi Note 7 (Based AOSP A15) (Non-Dynamic)
 on:
   workflow_call:
   workflow_dispatch:
-  push:
 
 env:
   # Device env
@@ -118,7 +117,7 @@ jobs:
         run: |
           # Only ${{ env.DEVICE_NAME }} use it.
           cd $GITHUB_WORKSPACE/device_kernel
-          # Nothing
+          echo "MESSAGE_THREAD_ID=25" >> $GITHUB_ENV
 
       - name: 🧰 Patch Kernel of Re:Kernel
         uses: ./.github/workflows/patch-rekernel
@@ -129,13 +128,6 @@ jobs:
       - name: 🔧 Patch Hide Stuff
         uses: ./.github/workflows/patch-hide-stuff
 
-      - name: Upload Build Artifacts For Packing Error
-        uses: actions/upload-artifact@v4
-        with:
-          name: fs
-          path: |
-            device_kernel/fs
-
       - name: 🚀 Build Process
         uses: ./.github/workflows/build-process
 
@@ -145,29 +137,5 @@ jobs:
       - name: ✏️ Upload Artifacts
         uses: ./.github/workflows/upload-files
         
-      - name: Bot session cache
-        if: "!contains(github.event.head_commit.message, '[skip ci]')"
-        id: bot_session_cache
-        uses: actions/cache@v4
-        with:
-          path: scripts/ksubot.session
-          key: ${{ runner.os }}-bot-session
-
-      - name: Upload to telegram
-        if: "!contains(github.event.head_commit.message, '[skip ci]')"
-        env:
-          CHAT_ID: ${{ vars.CHAT_ID }}
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          MESSAGE_THREAD_ID: 25
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-          COMMIT_URL: ${{ github.event.head_commit.url }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          REPOSITORY: ${{ github.repository }}
-          AUTHOR: ${{ github.event.head_commit.author.name }}
-          GITHUB_EVENT: ${{ toJson(github.event) }}
-        run: |
-          if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
-            pip3 install telethon
-            export TIME=$(date '+%Y-%m-%d %H:%M:%S')
-            python3 $GITHUB_WORKSPACE/scripts/ksubot.py $GITHUB_WORKSPACE/device_kernel/${{ env.PACK_NAME }}
-          fi
+      - name: 🛩️ Upload to Telegram
+        uses: ./.github/workflows/upload-telegram

@@ -1,3 +1,4 @@
+# https://github.com/tiann/KernelSU/blob/main/scripts/ksubot.py
 import asyncio
 import os
 import sys

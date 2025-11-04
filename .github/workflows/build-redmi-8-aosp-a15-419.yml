@@ -12,8 +12,8 @@ env:
   CUSTOM_CMDS : "CLANG_TRIPLE=aarch64-linux-gnu-"
   EXTRA_CMDS : "LD=ld.lld LLVM=1 LLVM_IAS=1"
 
-  KERNEL_SOURCE : "https://github.com/JackA1ltman/android_kernel_xiaomi_sdm439-4.19.git"
-  KERNEL_BRANCH : "ksu-next"
+  KERNEL_SOURCE : "https://github.com/yu13140/android_kernel_xiaomi_sdm439-4.19.git"
+  KERNEL_BRANCH : "more"
 
   CLANG_SOURCE : "https://github.com/kdrag0n/proton-clang.git"
   CLANG_BRANCH : "master"
@@ -122,7 +122,7 @@ jobs:
           # Only ${{ env.DEVICE_NAME }} use it.
           cd $GITHUB_WORKSPACE/device_kernel
           sed -i '/^CONFIG_LOCALVERSION=/ s/="\([^"]*\)"/=yu13140/' arch/arm64/configs/vendor/xiaomi-sdm439.config
-          # Nothing
+          echo "MESSAGE_THREAD_ID=23" >> $GITHUB_ENV
 
       - name: 🧰 Patch Kernel of Re:Kernel
         uses: ./.github/workflows/patch-rekernel
@@ -133,13 +133,6 @@ jobs:
       - name: 🔧 Patch Hide Stuff
         uses: ./.github/workflows/patch-hide-stuff
 
-      - name: Upload Build Artifacts For Packing Error
-        uses: actions/upload-artifact@v4
-        with:
-          name: fs
-          path: |
-            device_kernel/fs
-
       - name: 🚀 Build Process
         uses: ./.github/workflows/build-process
 
@@ -148,3 +141,6 @@ jobs:
 
       - name: ✏️ Upload Artifacts
         uses: ./.github/workflows/upload-files
+        
+      - name: 🛩️ Upload to Telegram
+        uses: ./.github/workflows/upload-telegram
