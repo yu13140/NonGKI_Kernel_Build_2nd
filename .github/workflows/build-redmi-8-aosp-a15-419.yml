@@ -3,6 +3,7 @@ name: Build Redmi 8 (Based-AOSP A15)
 on:
   workflow_call:
   workflow_dispatch:
+  push:
 
 env:
   # Device env
@@ -32,7 +33,7 @@ env:
   KERNELSU_SOURCE : "https://raw.githubusercontent.com/JJ-coffee/KernelSU-Next/next/kernel/setup.sh"
   KERNELSU_BRANCH : "next-susfs"
 
-  KERNELSU_AUTO_GET : "false" # if u want easy setting kernelsu, u can true.
+  KERNELSU_AUTO_GET : "true" # if u want easy setting kernelsu, u can true.
   KERNELSU_AUTO_FORK : "sukisu" # magic, rsuntk and sukisu
 
   SUSFS_ENABLE : true
@@ -81,7 +82,7 @@ env:
   GENERATE_DTB: "false" # if u kernel need DTB , but cannot auto generate it. (Only Anykernel3).
   GENERATE_CHIP: "xiaomi-sdm439" # only supported for qcom and mediatek.
 
-  BUILD_DEBUGGER: "false" # Output build errors.
+  BUILD_DEBUGGER: "true" # Output build errors.
   SKIP_PATCH: "true" # Ignore errors found in Patch Debugger.
 
   BUILD_OTHER_CONFIG: "true" # Merge config files.
@@ -130,6 +131,13 @@ jobs:
         
       - name: 🔧 Patch Hide Stuff
         uses: ./.github/workflows/patch-hide-stuff
+
+      - name: Upload Build Artifacts For Packing Error
+        uses: actions/upload-artifact@v4
+        with:
+          name: fs
+          path: |
+            device_kernel/fs
 
       - name: 🚀 Build Process
         uses: ./.github/workflows/build-process
