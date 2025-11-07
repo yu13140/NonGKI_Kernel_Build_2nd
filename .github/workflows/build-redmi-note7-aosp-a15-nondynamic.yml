@@ -3,6 +3,8 @@ name: Build Redmi Note 7 (Based AOSP A15) (Non-Dynamic)
 on:
   workflow_call:
   workflow_dispatch:
+  push:
+    branches: [ mirror2 ]
 
 env:
   # Device env
@@ -107,11 +109,11 @@ jobs:
       - name: ⚙️ Get neccssary tools
         uses: ./.github/workflows/build-ready
 
-      - name: 🔗 Patch for no-kprobe
-        uses: ./.github/workflows/patch-no-kprobe
-
       - name: 🪝 Patch Kernel of SUSFS
         uses: ./.github/workflows/patch-susfs
+
+      - name: 🔗 Patch for no-kprobe
+        uses: ./.github/workflows/patch-no-kprobe
 
       - name: 🪛 Extra Kernel Options
         run: |

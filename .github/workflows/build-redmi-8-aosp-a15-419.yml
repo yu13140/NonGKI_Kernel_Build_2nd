@@ -4,6 +4,7 @@ on:
   workflow_call:
   workflow_dispatch:
   push:
+    branches: [ mirror2 ]
 
 env:
   # Device env
