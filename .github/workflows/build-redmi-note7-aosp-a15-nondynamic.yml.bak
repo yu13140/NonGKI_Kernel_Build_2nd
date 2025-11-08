@@ -1,4 +1,4 @@
-name: Build Redmi 8 (Based-AOSP A15)
+name: Build Redmi Note 7 (Based AOSP A15) (Non-Dynamic)
 
 on:
   workflow_call:
@@ -8,26 +8,26 @@ on:
 
 env:
   # Device env
-  DEVICE_NAME : "redmi_8"
-  DEVICE_CODENAME : "olive"
+  DEVICE_NAME : "redmi_note7"
+  DEVICE_CODENAME : "lavender"
 
   CUSTOM_CMDS : "CLANG_TRIPLE=aarch64-linux-gnu-"
   EXTRA_CMDS : "LD=ld.lld LLVM=1 LLVM_IAS=1"
 
-  KERNEL_SOURCE : "https://github.com/yu13140/android_kernel_xiaomi_sdm439-4.19.git"
-  KERNEL_BRANCH : "more"
+  KERNEL_SOURCE : "https://github.com/yu13140/android_kernel_xiaomi_southwest-4.19.git"
+  KERNEL_BRANCH : "lz4k_oplus"
 
-  CLANG_SOURCE : "https://github.com/kdrag0n/proton-clang.git"
-  CLANG_BRANCH : "master"
+  CLANG_SOURCE : "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-Linux-X64.tar.xz"
+  CLANG_BRANCH : ""
 
   GCC_GNU : false
-  GCC_64_SOURCE : ""
-  GCC_64_BRANCH : ""
-  GCC_32_SOURCE : ""
-  GCC_32_BRANCH : ""
+  GCC_64_SOURCE : "https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9.git"
+  GCC_64_BRANCH : "android12L-release"
+  GCC_32_SOURCE : "https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/x86/x86_64-linux-android-4.9.git"
+  GCC_32_BRANCH : "android12L-release"
 
   DEFCONFIG_SOURCE: ""
-  DEFCONFIG_NAME : "vendor/msm8937-perf_defconfig"
+  DEFCONFIG_NAME : "lavender_defconfig"
   DEFCONFIG_ORIGIN_IMAGE: ""
   DEFCONFIG_FROM_BOOT: false
 
@@ -49,7 +49,7 @@ env:
   NEED_DTBO : false
   NEED_SAFE_DTBO : false
 
-  ROM_TEXT : "4.19_based_aosp_a15"
+  ROM_TEXT : "based_aosp_non-dynamic"
 
   # Other env
   PYTHON_VERSION: "3" # Only 2(Ubuntu 22.04 and Ubuntu 20.04) or 3(Any OS Versions).
@@ -61,42 +61,39 @@ env:
   PATCHES_SOURCE: "yu13140/NonGKI_Kernel_Patches" # [your_name]/[your_patch] -> gooder123/NonGKI_Patcher
   PATCHES_BRANCH: "mi_kernel" # [your_branch] -> main
 
-  SUSFS_FOLDER_FIXED: "redmi_8_419" # Fill in your patch prefix directory here. Leave it blank if there isn't one. -> your_folder
+  SUSFS_FOLDER_FIXED: "redmi_note7_419" # Fill in your patch prefix directory here. Leave it blank if there isn't one. -> your_folder
   SUSFS_155_FIXED: "susfs_155_fixed" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2 (Only v1.5.5 SuSFS)
   SUSFS_LATEST_FIXED: "" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2
 
   REKERNEL_ENABLE: "false" # if u need Re:Kernel.
-  REKERNEL_FIXED: "" # Fill in your patches here. If there are multiple patches, please separate them with a comma. Leave it blank if there isn't one. -> patch1,patch2 (From SUSFS_FOLDER_FIXED)
   
-  BASEBAND_GUARD_ENABLE: "true" #if u want prevent unauthorized writes to critical partitions/device nodes.
+  BASEBAND_GUARD_ENABLE: "false" #if u want prevent unauthorized writes to critical partitions/device nodes.
   BASEBAND_GUARD_BOOT: "false" #if u want to protect boot partition.
-
-  HIDE_STUFF: "true" # hide some of the features.
-  BBR_ENABLE: "true" # If you need TCP BBR algorithm.
 
   HOOK_METHOD: "syscall" # manual hook method,can choice : normal, syscall and tracepoint.
   HOOK_OLDER: "false" # contain backport older patch and syscall older patch.
 
   KPM_ENABLE: "false" # Only use it for SukiSU-Ultra.
-  KPM_PATCH: "false" # Patch KPM during compilation.
   KPM_PATCH_SOURCE: "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU_patch/refs/heads/main/kpm/patch_linux" # patch exec file source -> raw.githubusercontent.com/Test/Test/patch .
 
+  HIDE_STUFF: "true" # hide some of the features
+
   GENERATE_DTB: "false" # if u kernel need DTB , but cannot auto generate it. (Only Anykernel3).
-  GENERATE_CHIP: "xiaomi-sdm439" # only supported for qcom and mediatek.
+  GENERATE_CHIP: "qcom" # only supported for qcom and mediatek.
 
   BUILD_DEBUGGER: "true" # Output build errors.
   SKIP_PATCH: "true" # Ignore errors found in Patch Debugger.
 
-  BUILD_OTHER_CONFIG: "true" # Merge config files.
-  MERGE_CONFIG_FILES: "vendor/xiaomi-sdm439.config"
+  BUILD_OTHER_CONFIG: "false" # Merge config files.
+  MERGE_CONFIG_FILES: ""
 
   FREE_MORE_SPACE: "false" # if u want get more space, enabled it.
 
 jobs:
   build-kernel:
-    name: Redmi 8 (Based-AOSP A15)
+    name: Redmi Note 7 (Based AOSP A15) (Non-Dynamic)
     runs-on: ubuntu-latest # u can changed to ubuntu 22.04, and need container set ubuntu-latest
-    container: ubuntu:focal # if u need use arch linux -> archlinux/archlinux:latest or ubuntu 20.04 -> ubuntu:focal
+    # container: ubuntu:focal # if u need use arch linux -> archlinux/archlinux:latest or ubuntu 20.04 -> ubuntu:focal
     env:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
       CCACHE_NOHASHDIR: "true"
@@ -122,20 +119,16 @@ jobs:
         run: |
           # Only ${{ env.DEVICE_NAME }} use it.
           cd $GITHUB_WORKSPACE/device_kernel
-          sed -i '/^CONFIG_LOCALVERSION=/ s/="\([^"]*\)"/=yu13140/' arch/arm64/configs/vendor/xiaomi-sdm439.config
-          echo "MESSAGE_THREAD_ID=23" >> $GITHUB_ENV
+          echo "MESSAGE_THREAD_ID=25" >> $GITHUB_ENV
 
       - name: 🧰 Patch Kernel of Re:Kernel
         uses: ./.github/workflows/patch-rekernel
 
       - name: 🔒 Patch Kernel of Baseband Guard
         uses: ./.github/workflows/patch-baseband-guard
-        
+
       - name: 🔧 Patch Hide Stuff
         uses: ./.github/workflows/patch-hide-stuff
-
-      - name: 🛰️ Patch Kernel of BBR
-        uses: ./.github/workflows/patch-bbr
 
       - name: Upload Build Artifacts For Packing Error
         uses: actions/upload-artifact@v4
@@ -152,7 +145,7 @@ jobs:
 
       - name: ✏️ Upload Artifacts
         uses: ./.github/workflows/upload-files
-
+        
       - name: Bot session cache
         if: "!contains(github.event.head_commit.message, '[skip ci]')"
         id: bot_session_cache
@@ -172,11 +165,9 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           AUTHOR: ${{ github.event.head_commit.author.name }}
           MESSAGE_THREAD_ID: ${{ env.MESSAGE_THREAD_ID }}
-        shell: bash
         run: |
           if [ ! -z "${{ secrets.BOT_TOKEN }}" ]; then
             pip3 install telethon
             export NTIME=$(date '+%Y-%m-%d %H:%M:%S')
             python3 $GITHUB_WORKSPACE/scripts/kernelbot.py $GITHUB_WORKSPACE/device_kernel/${{ env.PACK_NAME }}
           fi
-

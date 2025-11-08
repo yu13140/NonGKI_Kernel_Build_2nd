@@ -3,8 +3,8 @@ name: Build Redmi Note 7 (Based AOSP A15) (Non-Dynamic)
 on:
   workflow_call:
   workflow_dispatch:
-  push:
-    branches: [ mirror2 ]
+#  push:
+#    branches: [ mirror2 ]
 
 env:
   # Device env
