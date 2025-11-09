@@ -3,24 +3,6 @@ name: 'Patch BBR Plus for Kernel.'
 runs:
   using: 'composite'
   steps:
-      - name: Set BBR Plus for DEFCONFIG
-        if: env.BBR_ENABLE == 'true'
-        shell: bash
-        run: |
-          cd $GITHUB_WORKSPACE/device_kernel
-
-          echo "CONFIG_TCP_CONG_BBRPLUS=y" >> ./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
-          echo "CONFIG_DEFAULT_BBRPLUS=y" >> ./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
-          echo "CONFIG_NET_SCH_DEFAULT_BBRP=y" >> ./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
-
-          if grep -q "CONFIG_DEFAULT_TCP_CONG" "./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}"; then
-            sed -i 's/^CONFIG_DEFAULT_TCP_CONG="[^"]*"/CONFIG_DEFAULT_TCP_CONG="bbrplus"/' "./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}"
-          fi
-
-          if ! grep -q "CONFIG_NET_SCH_DEFAULT=y" "./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}"; then
-            echo "CONFIG_NET_SCH_DEFAULT=y" >> ./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
-          fi
-
       - name: Patch BBR Plus
         if: env.BBR_ENABLE == 'true'
         shell: bash

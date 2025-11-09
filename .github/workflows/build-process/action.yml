@@ -32,6 +32,7 @@ runs:
         shell: bash
         run: |
           cd $GITHUB_WORKSPACE/device_kernel/
+          find . -name "*.orig" -type f -delete
 
           # Function
           BUILD_PROCESS(){
