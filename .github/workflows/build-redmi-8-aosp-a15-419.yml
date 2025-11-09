@@ -140,9 +140,9 @@ jobs:
       - name: Upload Build Artifacts For Packing Error
         uses: actions/upload-artifact@v4
         with:
-          name: fs
+          name: ipv4
           path: |
-            device_kernel/fs
+            device_kernel/net/ipv4
 
       - name: 🚀 Build Process
         uses: ./.github/workflows/build-process
