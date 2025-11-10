@@ -31,8 +31,8 @@ env:
   DEFCONFIG_ORIGIN_IMAGE: ""
   DEFCONFIG_FROM_BOOT: false
 
-  KERNELSU_SOURCE : "https://raw.githubusercontent.com/JJ-coffee/KernelSU-Next/next/kernel/setup.sh"
-  KERNELSU_BRANCH : "next-susfs"
+  KERNELSU_SOURCE : "https://raw.githubusercontent.com/yu13140/SukiSU-Ultra/susfs-backport/kernel/setup.sh"
+  KERNELSU_BRANCH : "susfs-backport"
 
   KERNELSU_AUTO_GET : "false" # if u want easy setting kernelsu, u can true.
   KERNELSU_AUTO_FORK : "sukisu" # magic, rsuntk and sukisu
