@@ -90,6 +90,7 @@ env:
   MERGE_CONFIG_FILES: "vendor/xiaomi-sdm439.config"
 
   FREE_MORE_SPACE: "false" # if u want get more space, enabled it.
+  UPLOAD_TG: "true"
 
 jobs:
   build-kernel:
@@ -150,7 +151,7 @@ jobs:
         uses: ./.github/workflows/upload-files
 
       - name: Bot session cache
-        if: "!contains(github.event.head_commit.message, '[skip ci]')"
+        if: env.UPLOAD_TG == 'true'
         id: bot_session_cache
         uses: actions/cache@v4
         with:
@@ -158,7 +159,7 @@ jobs:
           key: ${{ runner.os }}-bot-session
 
       - name: Upload to telegram
-        if: "!contains(github.event.head_commit.message, '[skip ci]')"
+        if: env.UPLOAD_TG == 'true'
         env:
           CHAT_ID: ${{ vars.CHAT_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}

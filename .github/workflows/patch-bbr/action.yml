@@ -46,6 +46,7 @@ runs:
 
           cp bbrplus/convert_official_linux-${{ env.KERNEL_VERSION }}.x_src_to_bbrplus.patch device_kernel
           cd device_kernel
+          echo "CONFIG_TCP_CONG_ADVANCED=y" >> ./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
           patch -p1 < convert_official_linux-${{ env.KERNEL_VERSION }}.x_src_to_bbrplus.patch || true
           REJ_FOUND
 
