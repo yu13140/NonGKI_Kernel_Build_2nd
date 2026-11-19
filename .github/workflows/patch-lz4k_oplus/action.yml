@@ -1,0 +1,69 @@
+name: 'Patch lz4k_oplus for Kernel.'
+
+runs:
+  using: 'composite'
+  steps:
+      - name: Patch lz4k_oplus
+        if: env.LZ4K_OPLUS_ENABLE == 'true'
+        shell: bash
+        run: |
+          cd $GITHUB_WORKSPACE
+
+          PACK_FILES(){
+            temp_dir=$(mktemp -d)
+            find . -name "*.rej" -exec cp --parents {} "$temp_dir" \;
+            find . -name "*.rej" | sed 's/\.rej$//' | xargs -I {} test -f {} && find . -name "*.rej" | sed 's/\.rej$//' | xargs -I {} cp --parents {} "$temp_dir"
+            tar -czf "rej_files_lz4k_oplus.tar.gz" -C "$temp_dir" .
+            rm -rf "$temp_dir"
+            echo "[+] Packed Successfully."
+
+            find . -type f \( -name "*.rej" -o -name "*.orig" \) -delete
+            echo "[+] Removed all .rej and .orig files."
+            echo "[+] =================================== "
+          }
+
+          REJ_FOUND(){
+            if [[ "${{ env.BUILD_DEBUGGER }}" == "true" ]]; then
+                echo "[+] Checking lz4k_oplus rej files..."
+                mapfile -t REJ_FILES < <(find . -type f -name "*.rej")
+                if [ ${#REJ_FILES[@]} -eq 0 ]; then
+                    echo "[+] Your kernel have no any rej files, Skipped."
+                else
+                    for CAT_REJ in "${REJ_FILES[@]}"; do
+                        echo "[-] Found .rej file: $CAT_REJ"
+                        cat $CAT_REJ
+                        echo "[+] =================================== "
+                    done
+                fi
+            fi
+          }
+
+          git clone https://github.com/SukiSU-Ultra/SukiSU_patch sukipatch --depth=1
+          git clone https://github.com/yu13140/android_kernel_xiaomi_sdm439-4.19 pick
+
+          cp -f sukipatch/other/zram/zram_patch/5.10/lz4k_oplus.patch device_kernel/
+          cp -rf pick/lib/lz4k_oplus device_kernel/lib
+          rm -rf sukipatch pick
+
+          cd device_kernel
+          patch -p1 < lz4k_oplus.patch || true
+          REJ_FOUND
+
+          echo "CONFIG_CRYPTO_LZ4K_OPLUS=y" >> ./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
+          if [[ "${{ env.DEFAULT_LZ4K_OPLUS }}" == true ]]; then
+            if grep -q "CONFIG_ZRAM_DEFAULT_COMP_ALGORITHM" "./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}"; then
+                sed -i 's/^CONFIG_ZRAM_DEFAULT_COMP_ALGORITHM="[^"]*"/CONFIG_ZRAM_DEFAULT_COMP_ALGORITHM="lz4k_oplus"/' "./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}"
+            else
+                echo "CONFIG_ZRAM_DEFAULT_COMP_ALGORITHM=\"lz4k_oplus\"" >> ./arch/${{ env.KERNEL_ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
+            fi
+          fi
+
+          echo "Patched lz4k_oplus for your kernel successfully."
+
+      - name: Upload Build Patch Rejected Files
+        if: env.BUILD_DEBUGGER == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: patch_rejected_files
+          path: |
+            device_kernel/rej_files_lz4k_oplus.tar.gz
