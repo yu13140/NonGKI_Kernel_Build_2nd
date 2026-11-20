@@ -1,6 +1,7 @@
 name: Build Xiaomi Redmi Note 7 (AOSP Based A15)
 
 on:
+  push:
   workflow_call:
   workflow_dispatch:
 
@@ -12,8 +13,8 @@ env:
   CUSTOM_CMDS : "CLANG_TRIPLE=aarch64-linux-gnu-"
   EXTRA_CMDS : "LD=ld.lld LLVM=1 LLVM_IAS=1"
 
-  KERNEL_SOURCE : "https://github.com/yu13140/android_kernel_xiaomi_southwest-4.19.git"
-  KERNEL_BRANCH : "lz4k_oplus"
+  KERNEL_SOURCE : "https://github.com/pix106/android_kernel_xiaomi_southwest-4.19.git"
+  KERNEL_BRANCH : "main-dynamic-3.18.2"
 
   CLANG_SOURCE : "https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-Linux-X64.tar.xz"
   CLANG_BRANCH : ""
