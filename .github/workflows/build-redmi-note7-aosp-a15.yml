@@ -28,7 +28,7 @@ env:
   GCC_32_BRANCH : "android12L-release"
 
   DEFCONFIG_SOURCE: ""
-  DEFCONFIG_NAME : "xiaomi/lavender.config"
+  DEFCONFIG_NAME : "vendor/xiaomi/lavender.config"
   DEFCONFIG_ORIGIN_IMAGE: ""
   DEFCONFIG_FROM_BOOT: false
 
@@ -155,7 +155,7 @@ jobs:
         uses: ./.github/workflows/upload-files
 
       - name: Bot session cache
-        if: "!contains(github.event.head_commit.message, '[skip ci]')"
+        if: "!contains(github.event.head_commit.message, '[skip tg]')"
         id: bot_session_cache
         uses: actions/cache@v4
         with:
@@ -163,7 +163,7 @@ jobs:
           key: ${{ runner.os }}-bot-session
 
       - name: Upload to telegram
-        if: "!contains(github.event.head_commit.message, '[skip ci]')"
+        if: "!contains(github.event.head_commit.message, '[skip tg]')"
         env:
           CHAT_ID: ${{ vars.CHAT_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
