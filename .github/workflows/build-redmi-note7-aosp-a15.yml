@@ -28,7 +28,7 @@ env:
   GCC_32_BRANCH : "android12L-release"
 
   DEFCONFIG_SOURCE: ""
-  DEFCONFIG_NAME : "vendor/xiaomi/lavender.config"
+  DEFCONFIG_NAME : "vendor/xiaomi/sdm660_defconfig"
   DEFCONFIG_ORIGIN_IMAGE: ""
   DEFCONFIG_FROM_BOOT: false
 
@@ -87,8 +87,8 @@ env:
   BUILD_DEBUGGER: "false" # Output build errors.
   SKIP_PATCH: "true" # Ignore errors found in Patch Debugger.
 
-  BUILD_OTHER_CONFIG: "false" # Merge config files.
-  MERGE_CONFIG_FILES: ""
+  BUILD_OTHER_CONFIG: "true" # Merge config files.
+  MERGE_CONFIG_FILES: "vendor/xiaomi/lavender.config"
 
   FREE_MORE_SPACE: "false" # if u want get more space, enabled it.
 
